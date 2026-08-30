@@ -1,0 +1,13 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 6
+    paths:
+        - src
+    bootstrapFiles:
+        - phpstan-bootstrap.php
+    ignoreErrors:
+        -
+            identifier: if.alwaysFalse
+            path: src/Core/Activator.php

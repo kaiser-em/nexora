@@ -1,0 +1,29 @@
+# Composer
+/vendor/
+composer.lock
+
+# Environment & Local overrides
+.env
+.env.local
+
+# IDE & OS
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Testing & Quality Assurance
+/build/
+/coverage/
+.phpunit.result.cache
+.phpstan.cache/
+phpstan.neon.cache/
+
+# Logs
+*.log
+/logs/
