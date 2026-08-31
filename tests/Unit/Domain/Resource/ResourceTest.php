@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Resource;
+namespace Silao\Tests\Unit\Domain\Resource;
 
-use Nexora\Domain\Common\ValueObject\BlackoutPeriod;
-use Nexora\Domain\Common\ValueObject\TimeOfDay;
-use Nexora\Domain\Common\ValueObject\ZonedDateTimeRange;
-use Nexora\Domain\Resource\Enum\ResourceStatus;
-use Nexora\Domain\Resource\Exception\InvalidResourceException;
-use Nexora\Domain\Resource\Exception\ScheduleOverlapException;
-use Nexora\Domain\Resource\Resource;
-use Nexora\Domain\Resource\ValueObject\Capacity;
-use Nexora\Domain\Resource\ValueObject\ResourceId;
-use Nexora\Domain\Resource\ValueObject\Schedule;
+use Silao\Domain\Common\ValueObject\BlackoutPeriod;
+use Silao\Domain\Common\ValueObject\TimeOfDay;
+use Silao\Domain\Common\ValueObject\ZonedDateTimeRange;
+use Silao\Domain\Resource\Enum\ResourceStatus;
+use Silao\Domain\Resource\Exception\InvalidResourceException;
+use Silao\Domain\Resource\Exception\ScheduleOverlapException;
+use Silao\Domain\Resource\Resource;
+use Silao\Domain\Resource\ValueObject\Capacity;
+use Silao\Domain\Resource\ValueObject\ResourceId;
+use Silao\Domain\Resource\ValueObject\Schedule;
 use PHPUnit\Framework\TestCase;
 
 final class ResourceTest extends TestCase

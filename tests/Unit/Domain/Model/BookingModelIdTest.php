@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Model;
+namespace Silao\Tests\Unit\Domain\Model;
 
-use Nexora\Domain\Model\Exception\InvalidBookingModelException;
-use Nexora\Domain\Model\ValueObject\BookingModelId;
+use Silao\Domain\Model\Exception\InvalidBookingModelException;
+use Silao\Domain\Model\ValueObject\BookingModelId;
 use PHPUnit\Framework\TestCase;
 
 final class BookingModelIdTest extends TestCase

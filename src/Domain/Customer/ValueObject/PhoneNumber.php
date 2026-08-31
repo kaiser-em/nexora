@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Customer\ValueObject;
+namespace Silao\Domain\Customer\ValueObject;
 
-use Nexora\Domain\Customer\Exception\InvalidPhoneNumberException;
+use Silao\Domain\Customer\Exception\InvalidPhoneNumberException;
 
 final readonly class PhoneNumber
 {

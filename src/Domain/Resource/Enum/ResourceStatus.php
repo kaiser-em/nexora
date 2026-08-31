@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Resource\Enum;
+namespace Silao\Domain\Resource\Enum;
 
 enum ResourceStatus: string
 {

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Condition;
+namespace Silao\Tests\Unit\Domain\Condition;
 
-use Nexora\Domain\Condition\Enum\ComparisonOperator;
-use Nexora\Domain\Condition\Exception\InvalidConditionException;
-use Nexora\Domain\Condition\ValueObject\ArrayConditionContext;
-use Nexora\Domain\Condition\ValueObject\CompositeCondition;
-use Nexora\Domain\Condition\ValueObject\SingleCondition;
+use Silao\Domain\Condition\Enum\ComparisonOperator;
+use Silao\Domain\Condition\Exception\InvalidConditionException;
+use Silao\Domain\Condition\ValueObject\ArrayConditionContext;
+use Silao\Domain\Condition\ValueObject\CompositeCondition;
+use Silao\Domain\Condition\ValueObject\SingleCondition;
 use PHPUnit\Framework\TestCase;
 
 final class CompositeConditionTest extends TestCase
@@ -22,7 +22,7 @@ final class CompositeConditionTest extends TestCase
     public function testInvalidElementInArrayThrowsException(): void
     {
         $this->expectException(InvalidConditionException::class);
-        // @phpstan-ignore argument.type
+        
         CompositeCondition::and([new SingleCondition('a', ComparisonOperator::Equals, 1), 'invalid_element']);
     }
 

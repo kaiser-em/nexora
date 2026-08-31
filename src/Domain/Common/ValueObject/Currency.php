@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Common\ValueObject;
+namespace Silao\Domain\Common\ValueObject;
 
-use Nexora\Domain\Common\Enum\CurrencyPosition;
-use Nexora\Domain\Common\Exception\InvalidArgumentException;
-use Nexora\Domain\Common\Exception\InvalidCurrencyException;
+use Silao\Domain\Common\Enum\CurrencyPosition;
+use Silao\Domain\Common\Exception\InvalidArgumentException;
+use Silao\Domain\Common\Exception\InvalidCurrencyException;
 
 final readonly class Currency
 {

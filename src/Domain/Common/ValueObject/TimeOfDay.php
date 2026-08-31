@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Common\ValueObject;
+namespace Silao\Domain\Common\ValueObject;
 
-use Nexora\Domain\Common\Exception\InvalidTimeOfDayException;
+use Silao\Domain\Common\Exception\InvalidTimeOfDayException;
 
 final readonly class TimeOfDay
 {

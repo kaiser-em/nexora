@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Model;
+namespace Silao\Tests\Unit\Domain\Model;
 
-use Nexora\Domain\Common\ValueObject\Currency;
-use Nexora\Domain\Common\ValueObject\ZonedDateTimeRange;
-use Nexora\Domain\Model\ValueObject\BookingModelId;
-use Nexora\Domain\Model\ValueObject\PricingContext;
-use Nexora\Domain\Model\ValueObject\SelectedOptionInput;
-use Nexora\Domain\Resource\ValueObject\ResourceId;
+use Silao\Domain\Common\ValueObject\Currency;
+use Silao\Domain\Common\ValueObject\ZonedDateTimeRange;
+use Silao\Domain\Model\ValueObject\BookingModelId;
+use Silao\Domain\Model\ValueObject\PricingContext;
+use Silao\Domain\Model\ValueObject\SelectedOptionInput;
+use Silao\Domain\Resource\ValueObject\ResourceId;
 use PHPUnit\Framework\TestCase;
 
 final class PricingContextTest extends TestCase

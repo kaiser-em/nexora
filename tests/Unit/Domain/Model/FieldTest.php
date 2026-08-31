@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Model;
+namespace Silao\Tests\Unit\Domain\Model;
 
-use Nexora\Domain\Condition\Enum\ComparisonOperator;
-use Nexora\Domain\Condition\ValueObject\ArrayConditionContext;
-use Nexora\Domain\Condition\ValueObject\SingleCondition;
-use Nexora\Domain\Model\Enum\FieldType;
-use Nexora\Domain\Model\Exception\InvalidFieldException;
-use Nexora\Domain\Model\ValueObject\Field;
+use Silao\Domain\Condition\Enum\ComparisonOperator;
+use Silao\Domain\Condition\ValueObject\ArrayConditionContext;
+use Silao\Domain\Condition\ValueObject\SingleCondition;
+use Silao\Domain\Model\Enum\FieldType;
+use Silao\Domain\Model\Exception\InvalidFieldException;
+use Silao\Domain\Model\ValueObject\Field;
 use PHPUnit\Framework\TestCase;
 
 final class FieldTest extends TestCase

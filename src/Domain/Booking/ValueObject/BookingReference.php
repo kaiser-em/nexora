@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Booking\ValueObject;
+namespace Silao\Domain\Booking\ValueObject;
 
-use Nexora\Domain\Booking\Exception\InvalidBookingReferenceException;
+use Silao\Domain\Booking\Exception\InvalidBookingReferenceException;
 
 final readonly class BookingReference
 {

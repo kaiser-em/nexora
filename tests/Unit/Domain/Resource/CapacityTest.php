@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Resource;
+namespace Silao\Tests\Unit\Domain\Resource;
 
-use Nexora\Domain\Resource\Exception\InvalidCapacityException;
-use Nexora\Domain\Resource\ValueObject\Capacity;
+use Silao\Domain\Resource\Exception\InvalidCapacityException;
+use Silao\Domain\Resource\ValueObject\Capacity;
 use PHPUnit\Framework\TestCase;
 
 final class CapacityTest extends TestCase

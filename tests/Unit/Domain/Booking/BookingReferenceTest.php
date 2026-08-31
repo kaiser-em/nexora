@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Booking;
+namespace Silao\Tests\Unit\Domain\Booking;
 
-use Nexora\Domain\Booking\Exception\InvalidBookingReferenceException;
-use Nexora\Domain\Booking\ValueObject\BookingReference;
+use Silao\Domain\Booking\Exception\InvalidBookingReferenceException;
+use Silao\Domain\Booking\ValueObject\BookingReference;
 use PHPUnit\Framework\TestCase;
 
 final class BookingReferenceTest extends TestCase

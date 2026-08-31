@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Customer;
+namespace Silao\Tests\Unit\Domain\Customer;
 
-use Nexora\Domain\Customer\Customer;
-use Nexora\Domain\Customer\Exception\InvalidCustomerException;
-use Nexora\Domain\Customer\ValueObject\CustomerId;
-use Nexora\Domain\Customer\ValueObject\Email;
-use Nexora\Domain\Customer\ValueObject\PhoneNumber;
+use Silao\Domain\Customer\Customer;
+use Silao\Domain\Customer\Exception\InvalidCustomerException;
+use Silao\Domain\Customer\ValueObject\CustomerId;
+use Silao\Domain\Customer\ValueObject\Email;
+use Silao\Domain\Customer\ValueObject\PhoneNumber;
 use PHPUnit\Framework\TestCase;
 
 final class CustomerTest extends TestCase

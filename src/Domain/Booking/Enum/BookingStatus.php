@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Booking\Enum;
+namespace Silao\Domain\Booking\Enum;
 
 enum BookingStatus: string
 {

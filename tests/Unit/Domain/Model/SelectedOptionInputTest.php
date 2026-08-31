@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Model;
+namespace Silao\Tests\Unit\Domain\Model;
 
-use Nexora\Domain\Model\Exception\InvalidOptionException;
-use Nexora\Domain\Model\ValueObject\SelectedOptionInput;
+use Silao\Domain\Model\Exception\InvalidOptionException;
+use Silao\Domain\Model\ValueObject\SelectedOptionInput;
 use PHPUnit\Framework\TestCase;
 
 final class SelectedOptionInputTest extends TestCase

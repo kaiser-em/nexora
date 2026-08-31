@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Condition\ValueObject;
+namespace Silao\Domain\Condition\ValueObject;
 
-use Nexora\Domain\Condition\Contract\ConditionContextInterface;
-use Nexora\Domain\Condition\Contract\ConditionInterface;
+use Silao\Domain\Condition\Contract\ConditionContextInterface;
+use Silao\Domain\Condition\Contract\ConditionInterface;
 
 final readonly class NotCondition implements ConditionInterface
 {

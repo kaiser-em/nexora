@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Booking\ValueObject;
+namespace Silao\Domain\Booking\ValueObject;
 
-use Nexora\Domain\Booking\Exception\InvalidBookingException;
+use Silao\Domain\Booking\Exception\InvalidBookingException;
 
 final readonly class BookingId
 {

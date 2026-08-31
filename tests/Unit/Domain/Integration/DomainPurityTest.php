@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Integration;
+namespace Silao\Tests\Unit\Domain\Integration;
 
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;

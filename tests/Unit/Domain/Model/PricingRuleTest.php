@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Model;
+namespace Silao\Tests\Unit\Domain\Model;
 
-use Nexora\Domain\Common\ValueObject\Currency;
-use Nexora\Domain\Common\ValueObject\Money;
-use Nexora\Domain\Common\ValueObject\Percentage;
-use Nexora\Domain\Condition\Enum\ComparisonOperator;
-use Nexora\Domain\Condition\ValueObject\SingleCondition;
-use Nexora\Domain\Model\Enum\PricingCalculationBasis;
-use Nexora\Domain\Model\Enum\PricingTarget;
-use Nexora\Domain\Model\Exception\InvalidPricingRuleException;
-use Nexora\Domain\Model\ValueObject\PricingRule;
+use Silao\Domain\Common\ValueObject\Currency;
+use Silao\Domain\Common\ValueObject\Money;
+use Silao\Domain\Common\ValueObject\Percentage;
+use Silao\Domain\Condition\Enum\ComparisonOperator;
+use Silao\Domain\Condition\ValueObject\SingleCondition;
+use Silao\Domain\Model\Enum\PricingCalculationBasis;
+use Silao\Domain\Model\Enum\PricingTarget;
+use Silao\Domain\Model\Exception\InvalidPricingRuleException;
+use Silao\Domain\Model\ValueObject\PricingRule;
 use PHPUnit\Framework\TestCase;
 
 final class PricingRuleTest extends TestCase

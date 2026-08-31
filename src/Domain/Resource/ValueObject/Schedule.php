@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Resource\ValueObject;
+namespace Silao\Domain\Resource\ValueObject;
 
-use Nexora\Domain\Common\ValueObject\TimeOfDay;
-use Nexora\Domain\Resource\Exception\InvalidScheduleException;
+use Silao\Domain\Common\ValueObject\TimeOfDay;
+use Silao\Domain\Resource\Exception\InvalidScheduleException;
 
 final readonly class Schedule
 {

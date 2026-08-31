@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Common\ValueObject;
+namespace Silao\Domain\Common\ValueObject;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Nexora\Domain\Common\Enum\RoundingMode;
-use Nexora\Domain\Common\Exception\InvalidDateTimeRangeException;
+use Silao\Domain\Common\Enum\RoundingMode;
+use Silao\Domain\Common\Exception\InvalidDateTimeRangeException;
 
 final readonly class ZonedDateTimeRange
 {

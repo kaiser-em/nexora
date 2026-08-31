@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Customer\Exception;
+namespace Silao\Domain\Customer\Exception;
 
-use Nexora\Domain\Common\Exception\DomainException;
+use Silao\Domain\Common\Exception\DomainException;
 
 class InvalidPhoneNumberException extends DomainException
 {

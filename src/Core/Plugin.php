@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Core;
+namespace Silao\Core;
 
 defined('ABSPATH') || exit;
 
@@ -61,7 +61,7 @@ final class Plugin
      */
     public function onInit(): void
     {
-        load_plugin_textdomain('nexora', false, dirname(NEXORA_PLUGIN_BASENAME) . '/languages');
+        load_plugin_textdomain('silao', false, dirname(SILAO_PLUGIN_BASENAME) . '/languages');
     }
 
     /**

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Booking;
+namespace Silao\Tests\Unit\Domain\Booking;
 
-use Nexora\Domain\Booking\Enum\QuoteLineType;
-use Nexora\Domain\Booking\Exception\InvalidQuoteException;
-use Nexora\Domain\Booking\ValueObject\Quote;
-use Nexora\Domain\Booking\ValueObject\QuoteLine;
-use Nexora\Domain\Common\ValueObject\Currency;
-use Nexora\Domain\Common\ValueObject\Money;
+use Silao\Domain\Booking\Enum\QuoteLineType;
+use Silao\Domain\Booking\Exception\InvalidQuoteException;
+use Silao\Domain\Booking\ValueObject\Quote;
+use Silao\Domain\Booking\ValueObject\QuoteLine;
+use Silao\Domain\Common\ValueObject\Currency;
+use Silao\Domain\Common\ValueObject\Money;
 use PHPUnit\Framework\TestCase;
 
 final class QuoteTest extends TestCase

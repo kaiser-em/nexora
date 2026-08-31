@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Model\ValueObject;
+namespace Silao\Domain\Model\ValueObject;
 
-use Nexora\Domain\Model\Exception\InvalidOptionException;
+use Silao\Domain\Model\Exception\InvalidOptionException;
 
 final readonly class SelectedOptionInput
 {

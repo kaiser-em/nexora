@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Booking;
+namespace Silao\Domain\Booking;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Nexora\Domain\Booking\Enum\BookingStatus;
-use Nexora\Domain\Booking\Event\BookingEvent;
-use Nexora\Domain\Booking\Exception\InvalidBookingException;
-use Nexora\Domain\Booking\Exception\InvalidPriceSnapshotException;
-use Nexora\Domain\Booking\ValueObject\BookingId;
-use Nexora\Domain\Booking\ValueObject\BookingReference;
-use Nexora\Domain\Booking\ValueObject\FormDataSnapshot;
-use Nexora\Domain\Booking\ValueObject\PriceSnapshot;
-use Nexora\Domain\Booking\ValueObject\Quote;
-use Nexora\Domain\Common\ValueObject\ZonedDateTimeRange;
-use Nexora\Domain\Customer\ValueObject\CustomerSnapshot;
-use Nexora\Domain\Model\ValueObject\BookingModelId;
-use Nexora\Domain\Resource\ValueObject\ResourceId;
+use Silao\Domain\Booking\Enum\BookingStatus;
+use Silao\Domain\Booking\Event\BookingEvent;
+use Silao\Domain\Booking\Exception\InvalidBookingException;
+use Silao\Domain\Booking\Exception\InvalidPriceSnapshotException;
+use Silao\Domain\Booking\ValueObject\BookingId;
+use Silao\Domain\Booking\ValueObject\BookingReference;
+use Silao\Domain\Booking\ValueObject\FormDataSnapshot;
+use Silao\Domain\Booking\ValueObject\PriceSnapshot;
+use Silao\Domain\Booking\ValueObject\Quote;
+use Silao\Domain\Common\ValueObject\ZonedDateTimeRange;
+use Silao\Domain\Customer\ValueObject\CustomerSnapshot;
+use Silao\Domain\Model\ValueObject\BookingModelId;
+use Silao\Domain\Resource\ValueObject\ResourceId;
 
 final class Booking
 {

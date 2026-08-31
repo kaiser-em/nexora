@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Common;
+namespace Silao\Tests\Unit\Domain\Common;
 
-use Nexora\Domain\Common\Enum\RoundingMode;
-use Nexora\Domain\Common\Exception\CurrencyMismatchException;
-use Nexora\Domain\Common\Exception\InvalidArgumentException;
-use Nexora\Domain\Common\Exception\MoneyOverflowException;
-use Nexora\Domain\Common\ValueObject\Currency;
-use Nexora\Domain\Common\ValueObject\Money;
-use Nexora\Domain\Common\ValueObject\Percentage;
+use Silao\Domain\Common\Enum\RoundingMode;
+use Silao\Domain\Common\Exception\CurrencyMismatchException;
+use Silao\Domain\Common\Exception\InvalidArgumentException;
+use Silao\Domain\Common\Exception\MoneyOverflowException;
+use Silao\Domain\Common\ValueObject\Currency;
+use Silao\Domain\Common\ValueObject\Money;
+use Silao\Domain\Common\ValueObject\Percentage;
 use PHPUnit\Framework\TestCase;
 
 final class MoneyTest extends TestCase

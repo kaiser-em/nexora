@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Customer\ValueObject;
+namespace Silao\Domain\Customer\ValueObject;
 
 final readonly class CustomerSnapshot
 {

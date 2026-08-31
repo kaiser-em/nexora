@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Condition\ValueObject;
+namespace Silao\Domain\Condition\ValueObject;
 
-use Nexora\Domain\Condition\Contract\ConditionContextInterface;
-use Nexora\Domain\Condition\Contract\ConditionInterface;
-use Nexora\Domain\Condition\Enum\LogicalOperator;
-use Nexora\Domain\Condition\Exception\InvalidConditionException;
+use Silao\Domain\Condition\Contract\ConditionContextInterface;
+use Silao\Domain\Condition\Contract\ConditionInterface;
+use Silao\Domain\Condition\Enum\LogicalOperator;
+use Silao\Domain\Condition\Exception\InvalidConditionException;
 
 final readonly class CompositeCondition implements ConditionInterface
 {

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Condition\Helper;
+namespace Silao\Domain\Condition\Helper;
 
-use Nexora\Domain\Condition\Enum\ComparisonOperator;
-use Nexora\Domain\Condition\Exception\InvalidConditionException;
+use Silao\Domain\Condition\Enum\ComparisonOperator;
+use Silao\Domain\Condition\Exception\InvalidConditionException;
 
 final class TypeComparator
 {

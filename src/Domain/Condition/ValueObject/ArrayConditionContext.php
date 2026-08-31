@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Condition\ValueObject;
+namespace Silao\Domain\Condition\ValueObject;
 
-use Nexora\Domain\Condition\Contract\ConditionContextInterface;
+use Silao\Domain\Condition\Contract\ConditionContextInterface;
 
 final readonly class ArrayConditionContext implements ConditionContextInterface
 {

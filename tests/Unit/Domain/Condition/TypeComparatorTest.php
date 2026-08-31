@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Condition;
+namespace Silao\Tests\Unit\Domain\Condition;
 
-use Nexora\Domain\Condition\Enum\ComparisonOperator;
-use Nexora\Domain\Condition\Exception\InvalidConditionException;
-use Nexora\Domain\Condition\Helper\TypeComparator;
+use Silao\Domain\Condition\Enum\ComparisonOperator;
+use Silao\Domain\Condition\Exception\InvalidConditionException;
+use Silao\Domain\Condition\Helper\TypeComparator;
 use PHPUnit\Framework\TestCase;
 
 final class TypeComparatorTest extends TestCase

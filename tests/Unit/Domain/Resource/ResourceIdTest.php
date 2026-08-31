@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Resource;
+namespace Silao\Tests\Unit\Domain\Resource;
 
-use Nexora\Domain\Resource\Exception\InvalidResourceException;
-use Nexora\Domain\Resource\ValueObject\ResourceId;
+use Silao\Domain\Resource\Exception\InvalidResourceException;
+use Silao\Domain\Resource\ValueObject\ResourceId;
 use PHPUnit\Framework\TestCase;
 
 final class ResourceIdTest extends TestCase

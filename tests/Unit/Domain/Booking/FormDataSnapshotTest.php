@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Booking;
+namespace Silao\Tests\Unit\Domain\Booking;
 
-use Nexora\Domain\Booking\Exception\InvalidFormDataSnapshotException;
-use Nexora\Domain\Booking\ValueObject\FormDataSnapshot;
+use Silao\Domain\Booking\Exception\InvalidFormDataSnapshotException;
+use Silao\Domain\Booking\ValueObject\FormDataSnapshot;
 use PHPUnit\Framework\TestCase;
 
 final class FormDataSnapshotTest extends TestCase

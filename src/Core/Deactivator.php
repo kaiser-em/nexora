@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Core;
+namespace Silao\Core;
 
 defined('ABSPATH') || exit;
 
@@ -17,6 +17,6 @@ final class Deactivator
     public static function deactivate(): void
     {
         // Flush transient caches if needed
-        delete_transient('nexora_active_models');
+        delete_transient('silao_active_models');
     }
 }

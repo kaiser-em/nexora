@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Booking\Exception;
+namespace Silao\Domain\Booking\Exception;
 
-use Nexora\Domain\Common\Exception\DomainException;
+use Silao\Domain\Common\Exception\DomainException;
 
 class InvalidBookingException extends DomainException
 {

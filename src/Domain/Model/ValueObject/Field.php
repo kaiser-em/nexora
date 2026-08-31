@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Model\ValueObject;
+namespace Silao\Domain\Model\ValueObject;
 
-use Nexora\Domain\Condition\Contract\ConditionContextInterface;
-use Nexora\Domain\Condition\Contract\ConditionInterface;
-use Nexora\Domain\Model\Enum\FieldType;
-use Nexora\Domain\Model\Exception\InvalidFieldException;
+use Silao\Domain\Condition\Contract\ConditionContextInterface;
+use Silao\Domain\Condition\Contract\ConditionInterface;
+use Silao\Domain\Model\Enum\FieldType;
+use Silao\Domain\Model\Exception\InvalidFieldException;
 
 final readonly class Field
 {

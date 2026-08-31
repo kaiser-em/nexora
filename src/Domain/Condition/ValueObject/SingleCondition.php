@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Condition\ValueObject;
+namespace Silao\Domain\Condition\ValueObject;
 
-use Nexora\Domain\Condition\Contract\ConditionContextInterface;
-use Nexora\Domain\Condition\Contract\ConditionInterface;
-use Nexora\Domain\Condition\Enum\ComparisonOperator;
-use Nexora\Domain\Condition\Exception\InvalidConditionException;
-use Nexora\Domain\Condition\Helper\TypeComparator;
+use Silao\Domain\Condition\Contract\ConditionContextInterface;
+use Silao\Domain\Condition\Contract\ConditionInterface;
+use Silao\Domain\Condition\Enum\ComparisonOperator;
+use Silao\Domain\Condition\Exception\InvalidConditionException;
+use Silao\Domain\Condition\Helper\TypeComparator;
 
 final readonly class SingleCondition implements ConditionInterface
 {

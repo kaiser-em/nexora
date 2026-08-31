@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Common;
+namespace Silao\Tests\Unit\Domain\Common;
 
-use Nexora\Domain\Common\Enum\CurrencyPosition;
-use Nexora\Domain\Common\Exception\InvalidArgumentException;
-use Nexora\Domain\Common\Exception\InvalidCurrencyException;
-use Nexora\Domain\Common\ValueObject\Currency;
+use Silao\Domain\Common\Enum\CurrencyPosition;
+use Silao\Domain\Common\Exception\InvalidArgumentException;
+use Silao\Domain\Common\Exception\InvalidCurrencyException;
+use Silao\Domain\Common\ValueObject\Currency;
 use PHPUnit\Framework\TestCase;
 
 final class CurrencyTest extends TestCase

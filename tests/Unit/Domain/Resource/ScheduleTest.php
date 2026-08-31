@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Resource;
+namespace Silao\Tests\Unit\Domain\Resource;
 
-use Nexora\Domain\Common\ValueObject\TimeOfDay;
-use Nexora\Domain\Resource\Exception\InvalidScheduleException;
-use Nexora\Domain\Resource\ValueObject\Schedule;
+use Silao\Domain\Common\ValueObject\TimeOfDay;
+use Silao\Domain\Resource\Exception\InvalidScheduleException;
+use Silao\Domain\Resource\ValueObject\Schedule;
 use PHPUnit\Framework\TestCase;
 
 final class ScheduleTest extends TestCase

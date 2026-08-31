@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Model;
+namespace Silao\Domain\Model;
 
-use Nexora\Domain\Common\ValueObject\Money;
-use Nexora\Domain\Model\Enum\BookingModelStatus;
-use Nexora\Domain\Model\Enum\ResourceStrategyType;
-use Nexora\Domain\Model\Exception\InvalidBookingModelException;
-use Nexora\Domain\Model\Exception\InvalidFieldException;
-use Nexora\Domain\Model\Exception\InvalidOptionException;
-use Nexora\Domain\Model\Exception\InvalidPricingRuleException;
-use Nexora\Domain\Model\ValueObject\BookingModelId;
-use Nexora\Domain\Model\ValueObject\Field;
-use Nexora\Domain\Model\ValueObject\Option;
-use Nexora\Domain\Model\ValueObject\PricingRule;
-use Nexora\Domain\Resource\ValueObject\ResourceId;
+use Silao\Domain\Common\ValueObject\Money;
+use Silao\Domain\Model\Enum\BookingModelStatus;
+use Silao\Domain\Model\Enum\ResourceStrategyType;
+use Silao\Domain\Model\Exception\InvalidBookingModelException;
+use Silao\Domain\Model\Exception\InvalidFieldException;
+use Silao\Domain\Model\Exception\InvalidOptionException;
+use Silao\Domain\Model\Exception\InvalidPricingRuleException;
+use Silao\Domain\Model\ValueObject\BookingModelId;
+use Silao\Domain\Model\ValueObject\Field;
+use Silao\Domain\Model\ValueObject\Option;
+use Silao\Domain\Model\ValueObject\PricingRule;
+use Silao\Domain\Resource\ValueObject\ResourceId;
 
 final class BookingModel
 {

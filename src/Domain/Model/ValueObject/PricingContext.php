@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Model\ValueObject;
+namespace Silao\Domain\Model\ValueObject;
 
 use DateTimeImmutable;
-use Nexora\Domain\Common\ValueObject\Currency;
-use Nexora\Domain\Common\ValueObject\ZonedDateTimeRange;
-use Nexora\Domain\Condition\Contract\ConditionContextInterface;
-use Nexora\Domain\Model\Exception\InvalidPricingContextException;
-use Nexora\Domain\Resource\ValueObject\ResourceId;
+use Silao\Domain\Common\ValueObject\Currency;
+use Silao\Domain\Common\ValueObject\ZonedDateTimeRange;
+use Silao\Domain\Condition\Contract\ConditionContextInterface;
+use Silao\Domain\Model\Exception\InvalidPricingContextException;
+use Silao\Domain\Resource\ValueObject\ResourceId;
 
 final readonly class PricingContext implements ConditionContextInterface
 {

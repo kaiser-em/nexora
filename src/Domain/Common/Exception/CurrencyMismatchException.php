@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Common\Exception;
+namespace Silao\Domain\Common\Exception;
 
 class CurrencyMismatchException extends DomainException
 {

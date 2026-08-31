@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Integration;
+namespace Silao\Tests\Unit\Domain\Integration;
 
-use Nexora\Domain\Booking\Booking;
-use Nexora\Domain\Booking\ValueObject\BookingId;
-use Nexora\Domain\Booking\ValueObject\BookingReference;
-use Nexora\Domain\Booking\ValueObject\FormDataSnapshot;
-use Nexora\Domain\Common\ValueObject\Currency;
-use Nexora\Domain\Common\ValueObject\Money;
-use Nexora\Domain\Common\ValueObject\ZonedDateTimeRange;
-use Nexora\Domain\Customer\Customer;
-use Nexora\Domain\Customer\ValueObject\CustomerId;
-use Nexora\Domain\Model\BookingModel;
-use Nexora\Domain\Model\Enum\ResourceStrategyType;
-use Nexora\Domain\Model\ValueObject\BookingModelId;
-use Nexora\Domain\Resource\Resource;
-use Nexora\Domain\Resource\ValueObject\Capacity;
-use Nexora\Domain\Resource\ValueObject\ResourceId;
+use Silao\Domain\Booking\Booking;
+use Silao\Domain\Booking\ValueObject\BookingId;
+use Silao\Domain\Booking\ValueObject\BookingReference;
+use Silao\Domain\Booking\ValueObject\FormDataSnapshot;
+use Silao\Domain\Common\ValueObject\Currency;
+use Silao\Domain\Common\ValueObject\Money;
+use Silao\Domain\Common\ValueObject\ZonedDateTimeRange;
+use Silao\Domain\Customer\Customer;
+use Silao\Domain\Customer\ValueObject\CustomerId;
+use Silao\Domain\Model\BookingModel;
+use Silao\Domain\Model\Enum\ResourceStrategyType;
+use Silao\Domain\Model\ValueObject\BookingModelId;
+use Silao\Domain\Resource\Resource;
+use Silao\Domain\Resource\ValueObject\Capacity;
+use Silao\Domain\Resource\ValueObject\ResourceId;
 use PHPUnit\Framework\TestCase;
 
 final class AggregateBoundaryTest extends TestCase
@@ -43,7 +43,7 @@ final class AggregateBoundaryTest extends TestCase
     {
         $customer = new Customer(
             CustomerId::fromString('c1'),
-            \Nexora\Domain\Customer\ValueObject\Email::fromString('client@example.com'),
+            \Silao\Domain\Customer\ValueObject\Email::fromString('client@example.com'),
             'Alice',
             'Smith'
         );

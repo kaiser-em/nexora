@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Common;
+namespace Silao\Tests\Unit\Domain\Common;
 
-use Nexora\Domain\Common\Exception\InvalidPercentageException;
-use Nexora\Domain\Common\ValueObject\Percentage;
+use Silao\Domain\Common\Exception\InvalidPercentageException;
+use Silao\Domain\Common\ValueObject\Percentage;
 use PHPUnit\Framework\TestCase;
 
 final class PercentageTest extends TestCase

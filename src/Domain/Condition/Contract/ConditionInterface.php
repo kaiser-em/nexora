@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Condition\Contract;
+namespace Silao\Domain\Condition\Contract;
 
 interface ConditionInterface
 {

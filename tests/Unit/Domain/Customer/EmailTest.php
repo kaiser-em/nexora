@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Customer;
+namespace Silao\Tests\Unit\Domain\Customer;
 
-use Nexora\Domain\Customer\Exception\InvalidEmailException;
-use Nexora\Domain\Customer\ValueObject\Email;
+use Silao\Domain\Customer\Exception\InvalidEmailException;
+use Silao\Domain\Customer\ValueObject\Email;
 use PHPUnit\Framework\TestCase;
 
 final class EmailTest extends TestCase

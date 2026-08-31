@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Booking;
+namespace Silao\Tests\Unit\Domain\Booking;
 
-use Nexora\Domain\Booking\Booking;
-use Nexora\Domain\Booking\Enum\BookingStatus;
-use Nexora\Domain\Booking\Enum\QuoteLineType;
-use Nexora\Domain\Booking\Exception\InvalidBookingException;
-use Nexora\Domain\Booking\ValueObject\BookingId;
-use Nexora\Domain\Booking\ValueObject\BookingReference;
-use Nexora\Domain\Booking\ValueObject\FormDataSnapshot;
-use Nexora\Domain\Booking\ValueObject\Quote;
-use Nexora\Domain\Booking\ValueObject\QuoteLine;
-use Nexora\Domain\Common\ValueObject\Currency;
-use Nexora\Domain\Common\ValueObject\Money;
-use Nexora\Domain\Common\ValueObject\ZonedDateTimeRange;
-use Nexora\Domain\Customer\Customer;
-use Nexora\Domain\Customer\ValueObject\CustomerId;
-use Nexora\Domain\Customer\ValueObject\CustomerSnapshot;
-use Nexora\Domain\Customer\ValueObject\Email;
-use Nexora\Domain\Model\ValueObject\BookingModelId;
-use Nexora\Domain\Resource\ValueObject\ResourceId;
+use Silao\Domain\Booking\Booking;
+use Silao\Domain\Booking\Enum\BookingStatus;
+use Silao\Domain\Booking\Enum\QuoteLineType;
+use Silao\Domain\Booking\Exception\InvalidBookingException;
+use Silao\Domain\Booking\ValueObject\BookingId;
+use Silao\Domain\Booking\ValueObject\BookingReference;
+use Silao\Domain\Booking\ValueObject\FormDataSnapshot;
+use Silao\Domain\Booking\ValueObject\Quote;
+use Silao\Domain\Booking\ValueObject\QuoteLine;
+use Silao\Domain\Common\ValueObject\Currency;
+use Silao\Domain\Common\ValueObject\Money;
+use Silao\Domain\Common\ValueObject\ZonedDateTimeRange;
+use Silao\Domain\Customer\Customer;
+use Silao\Domain\Customer\ValueObject\CustomerId;
+use Silao\Domain\Customer\ValueObject\CustomerSnapshot;
+use Silao\Domain\Customer\ValueObject\Email;
+use Silao\Domain\Model\ValueObject\BookingModelId;
+use Silao\Domain\Resource\ValueObject\ResourceId;
 use PHPUnit\Framework\TestCase;
 
 final class BookingTest extends TestCase

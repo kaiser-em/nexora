@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Customer;
+namespace Silao\Tests\Unit\Domain\Customer;
 
-use Nexora\Domain\Customer\Exception\InvalidCustomerException;
-use Nexora\Domain\Customer\ValueObject\CustomerId;
+use Silao\Domain\Customer\Exception\InvalidCustomerException;
+use Silao\Domain\Customer\ValueObject\CustomerId;
 use PHPUnit\Framework\TestCase;
 
 final class CustomerIdTest extends TestCase

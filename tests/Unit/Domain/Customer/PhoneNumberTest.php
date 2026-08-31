@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Customer;
+namespace Silao\Tests\Unit\Domain\Customer;
 
-use Nexora\Domain\Customer\Exception\InvalidPhoneNumberException;
-use Nexora\Domain\Customer\ValueObject\PhoneNumber;
+use Silao\Domain\Customer\Exception\InvalidPhoneNumberException;
+use Silao\Domain\Customer\ValueObject\PhoneNumber;
 use PHPUnit\Framework\TestCase;
 
 final class PhoneNumberTest extends TestCase

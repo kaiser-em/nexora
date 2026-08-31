@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Resource\ValueObject;
+namespace Silao\Domain\Resource\ValueObject;
 
-use Nexora\Domain\Resource\Exception\InvalidCapacityException;
+use Silao\Domain\Resource\Exception\InvalidCapacityException;
 
 final readonly class Capacity
 {

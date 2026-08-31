@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Model\ValueObject;
+namespace Silao\Domain\Model\ValueObject;
 
-use Nexora\Domain\Common\ValueObject\Money;
-use Nexora\Domain\Condition\Contract\ConditionContextInterface;
-use Nexora\Domain\Condition\Contract\ConditionInterface;
-use Nexora\Domain\Model\Enum\OptionPricingType;
-use Nexora\Domain\Model\Exception\InvalidOptionException;
+use Silao\Domain\Common\ValueObject\Money;
+use Silao\Domain\Condition\Contract\ConditionContextInterface;
+use Silao\Domain\Condition\Contract\ConditionInterface;
+use Silao\Domain\Model\Enum\OptionPricingType;
+use Silao\Domain\Model\Exception\InvalidOptionException;
 
 final readonly class Option
 {

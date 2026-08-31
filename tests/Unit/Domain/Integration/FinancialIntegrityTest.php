@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Integration;
+namespace Silao\Tests\Unit\Domain\Integration;
 
-use Nexora\Domain\Booking\Enum\QuoteLineType;
-use Nexora\Domain\Booking\ValueObject\Quote;
-use Nexora\Domain\Booking\ValueObject\QuoteLine;
-use Nexora\Domain\Common\Exception\CurrencyMismatchException;
-use Nexora\Domain\Common\ValueObject\Currency;
-use Nexora\Domain\Common\ValueObject\Money;
-use Nexora\Domain\Common\ValueObject\Percentage;
+use Silao\Domain\Booking\Enum\QuoteLineType;
+use Silao\Domain\Booking\ValueObject\Quote;
+use Silao\Domain\Booking\ValueObject\QuoteLine;
+use Silao\Domain\Common\Exception\CurrencyMismatchException;
+use Silao\Domain\Common\ValueObject\Currency;
+use Silao\Domain\Common\ValueObject\Money;
+use Silao\Domain\Common\ValueObject\Percentage;
 use PHPUnit\Framework\TestCase;
 
 final class FinancialIntegrityTest extends TestCase

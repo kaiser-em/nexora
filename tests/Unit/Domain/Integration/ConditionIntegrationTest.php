@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Integration;
+namespace Silao\Tests\Unit\Domain\Integration;
 
-use Nexora\Domain\Common\ValueObject\Currency;
-use Nexora\Domain\Common\ValueObject\ZonedDateTimeRange;
-use Nexora\Domain\Condition\Enum\ComparisonOperator;
-use Nexora\Domain\Condition\ValueObject\CompositeCondition;
-use Nexora\Domain\Condition\ValueObject\SingleCondition;
-use Nexora\Domain\Model\Enum\FieldType;
-use Nexora\Domain\Model\ValueObject\BookingModelId;
-use Nexora\Domain\Model\ValueObject\Field;
-use Nexora\Domain\Model\ValueObject\PricingContext;
-use Nexora\Domain\Model\ValueObject\SelectedOptionInput;
+use Silao\Domain\Common\ValueObject\Currency;
+use Silao\Domain\Common\ValueObject\ZonedDateTimeRange;
+use Silao\Domain\Condition\Enum\ComparisonOperator;
+use Silao\Domain\Condition\ValueObject\CompositeCondition;
+use Silao\Domain\Condition\ValueObject\SingleCondition;
+use Silao\Domain\Model\Enum\FieldType;
+use Silao\Domain\Model\ValueObject\BookingModelId;
+use Silao\Domain\Model\ValueObject\Field;
+use Silao\Domain\Model\ValueObject\PricingContext;
+use Silao\Domain\Model\ValueObject\SelectedOptionInput;
 use PHPUnit\Framework\TestCase;
 
 final class ConditionIntegrationTest extends TestCase

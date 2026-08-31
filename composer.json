@@ -1,11 +1,11 @@
 {
-  "name": "nexora/nexora",
-  "description": "Configurable Booking & Pricing Engine for WordPress",
+  "name": "silao/silao",
+  "description": "Configurable Booking & Pricing Engine for WordPress. One engine. Any booking model.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "authors": [
     {
-      "name": "Nexora Team"
+      "name": "Silao Team"
     }
   ],
   "require": {
@@ -18,12 +18,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Nexora\\": "src/"
+      "Silao\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Nexora\\Tests\\": "tests/"
+      "Silao\\Tests\\": "tests/"
     }
   },
   "config": {

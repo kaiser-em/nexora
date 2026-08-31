@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Condition\Exception;
+namespace Silao\Domain\Condition\Exception;
 
-use Nexora\Domain\Common\Exception\DomainException;
+use Silao\Domain\Common\Exception\DomainException;
 
 class InvalidConditionException extends DomainException
 {

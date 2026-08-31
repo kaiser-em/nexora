@@ -2,28 +2,28 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Model;
+namespace Silao\Tests\Unit\Domain\Model;
 
-use Nexora\Domain\Common\ValueObject\Currency;
-use Nexora\Domain\Common\ValueObject\Money;
-use Nexora\Domain\Condition\Enum\ComparisonOperator;
-use Nexora\Domain\Condition\ValueObject\SingleCondition;
-use Nexora\Domain\Model\BookingModel;
-use Nexora\Domain\Model\Enum\BookingModelStatus;
-use Nexora\Domain\Model\Enum\FieldType;
-use Nexora\Domain\Model\Enum\OptionPricingType;
-use Nexora\Domain\Model\Enum\PricingCalculationBasis;
-use Nexora\Domain\Model\Enum\PricingTarget;
-use Nexora\Domain\Model\Enum\ResourceStrategyType;
-use Nexora\Domain\Model\Exception\InvalidBookingModelException;
-use Nexora\Domain\Model\Exception\InvalidFieldException;
-use Nexora\Domain\Model\Exception\InvalidOptionException;
-use Nexora\Domain\Model\Exception\InvalidPricingRuleException;
-use Nexora\Domain\Model\ValueObject\BookingModelId;
-use Nexora\Domain\Model\ValueObject\Field;
-use Nexora\Domain\Model\ValueObject\Option;
-use Nexora\Domain\Model\ValueObject\PricingRule;
-use Nexora\Domain\Resource\ValueObject\ResourceId;
+use Silao\Domain\Common\ValueObject\Currency;
+use Silao\Domain\Common\ValueObject\Money;
+use Silao\Domain\Condition\Enum\ComparisonOperator;
+use Silao\Domain\Condition\ValueObject\SingleCondition;
+use Silao\Domain\Model\BookingModel;
+use Silao\Domain\Model\Enum\BookingModelStatus;
+use Silao\Domain\Model\Enum\FieldType;
+use Silao\Domain\Model\Enum\OptionPricingType;
+use Silao\Domain\Model\Enum\PricingCalculationBasis;
+use Silao\Domain\Model\Enum\PricingTarget;
+use Silao\Domain\Model\Enum\ResourceStrategyType;
+use Silao\Domain\Model\Exception\InvalidBookingModelException;
+use Silao\Domain\Model\Exception\InvalidFieldException;
+use Silao\Domain\Model\Exception\InvalidOptionException;
+use Silao\Domain\Model\Exception\InvalidPricingRuleException;
+use Silao\Domain\Model\ValueObject\BookingModelId;
+use Silao\Domain\Model\ValueObject\Field;
+use Silao\Domain\Model\ValueObject\Option;
+use Silao\Domain\Model\ValueObject\PricingRule;
+use Silao\Domain\Resource\ValueObject\ResourceId;
 use PHPUnit\Framework\TestCase;
 
 final class BookingModelTest extends TestCase

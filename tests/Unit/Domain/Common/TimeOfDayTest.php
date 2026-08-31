@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Common;
+namespace Silao\Tests\Unit\Domain\Common;
 
-use Nexora\Domain\Common\Exception\InvalidTimeOfDayException;
-use Nexora\Domain\Common\ValueObject\TimeOfDay;
+use Silao\Domain\Common\Exception\InvalidTimeOfDayException;
+use Silao\Domain\Common\ValueObject\TimeOfDay;
 use PHPUnit\Framework\TestCase;
 
 final class TimeOfDayTest extends TestCase

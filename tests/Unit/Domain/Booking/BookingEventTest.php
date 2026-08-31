@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Tests\Unit\Domain\Booking;
+namespace Silao\Tests\Unit\Domain\Booking;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Nexora\Domain\Booking\Event\BookingEvent;
-use Nexora\Domain\Booking\Exception\InvalidBookingException;
+use Silao\Domain\Booking\Event\BookingEvent;
+use Silao\Domain\Booking\Exception\InvalidBookingException;
 use PHPUnit\Framework\TestCase;
 
 final class BookingEventTest extends TestCase

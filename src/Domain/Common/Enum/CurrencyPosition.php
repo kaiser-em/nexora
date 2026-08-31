@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Common\Enum;
+namespace Silao\Domain\Common\Enum;
 
 enum CurrencyPosition: string
 {

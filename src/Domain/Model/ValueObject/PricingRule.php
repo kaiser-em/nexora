@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Model\ValueObject;
+namespace Silao\Domain\Model\ValueObject;
 
-use Nexora\Domain\Common\ValueObject\Money;
-use Nexora\Domain\Common\ValueObject\Percentage;
-use Nexora\Domain\Condition\Contract\ConditionInterface;
-use Nexora\Domain\Model\Enum\PricingCalculationBasis;
-use Nexora\Domain\Model\Enum\PricingTarget;
-use Nexora\Domain\Model\Exception\InvalidPricingRuleException;
+use Silao\Domain\Common\ValueObject\Money;
+use Silao\Domain\Common\ValueObject\Percentage;
+use Silao\Domain\Condition\Contract\ConditionInterface;
+use Silao\Domain\Model\Enum\PricingCalculationBasis;
+use Silao\Domain\Model\Enum\PricingTarget;
+use Silao\Domain\Model\Exception\InvalidPricingRuleException;
 
 final readonly class PricingRule
 {

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Booking\ValueObject;
+namespace Silao\Domain\Booking\ValueObject;
 
-use Nexora\Domain\Booking\Enum\QuoteLineType;
-use Nexora\Domain\Booking\Exception\InvalidQuoteException;
-use Nexora\Domain\Common\Exception\CurrencyMismatchException;
-use Nexora\Domain\Common\Exception\MoneyOverflowException;
-use Nexora\Domain\Common\ValueObject\Money;
+use Silao\Domain\Booking\Enum\QuoteLineType;
+use Silao\Domain\Booking\Exception\InvalidQuoteException;
+use Silao\Domain\Common\Exception\CurrencyMismatchException;
+use Silao\Domain\Common\Exception\MoneyOverflowException;
+use Silao\Domain\Common\ValueObject\Money;
 
 final readonly class QuoteLine
 {

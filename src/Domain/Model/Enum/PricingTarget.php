@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Model\Enum;
+namespace Silao\Domain\Model\Enum;
 
 enum PricingTarget: string
 {

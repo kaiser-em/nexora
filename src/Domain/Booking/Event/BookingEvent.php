@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Nexora\Domain\Booking\Event;
+namespace Silao\Domain\Booking\Event;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Nexora\Domain\Booking\Exception\InvalidBookingException;
+use Silao\Domain\Booking\Exception\InvalidBookingException;
 
 final readonly class BookingEvent
 {
