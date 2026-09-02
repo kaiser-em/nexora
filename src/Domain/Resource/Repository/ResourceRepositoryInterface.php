@@ -1,0 +1,1 @@
+<?php declare(strict_types=1); namespace Silao\Domain\Resource\Repository; use Silao\Domain\Resource\Resource; use Silao\Domain\Resource\ValueObject\ResourceId; interface ResourceRepositoryInterface { public function save(Resource $resource): void; public function findById(ResourceId $id): ?Resource; /** @return array<Resource> */ public function findAllActive(): array; }
