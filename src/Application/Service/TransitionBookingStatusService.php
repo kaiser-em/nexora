@@ -12,6 +12,8 @@ use Silao\Application\Event\BookingCompletedEvent;
 use Silao\Application\Event\BookingConfirmedEvent;
 use Silao\Application\Event\EventDispatcherInterface;
 use Silao\Application\Exception\ApplicationException;
+use Silao\Application\Transaction\TransactionManagerInterface;
+use Silao\Domain\Booking\Booking;
 use Silao\Domain\Booking\Repository\BookingRepositoryInterface;
 use Silao\Domain\Booking\ValueObject\BookingId;
 
@@ -19,6 +21,7 @@ final readonly class TransitionBookingStatusService
 {
     public function __construct(
         private BookingRepositoryInterface $bookingRepository,
+        private TransactionManagerInterface $transactionManager,
         private EventDispatcherInterface $eventDispatcher
     ) {
     }
@@ -28,43 +31,47 @@ final readonly class TransitionBookingStatusService
      */
     public function execute(TransitionBookingStatusCommand $command): BookingDTO
     {
-        $bookingId = BookingId::fromString($command->bookingId);
-        $booking = $this->bookingRepository->findById($bookingId);
+        /** @var array{booking: Booking, event: ?object} $txResult */
+        $txResult = $this->transactionManager->transactional(function () use ($command): array {
+            $bookingId = BookingId::fromString($command->bookingId);
+            $booking = $this->bookingRepository->findById($bookingId);
 
-        if ($booking === null) {
-            throw new ApplicationException(sprintf('Booking "%s" not found.', $command->bookingId));
+            if ($booking === null) {
+                throw new ApplicationException(sprintf('Booking "%s" not found.', $command->bookingId));
+            }
+
+            $eventToDispatch = null;
+
+            switch ($command->action) {
+                case 'confirm':
+                    $booking->confirm();
+                    $eventToDispatch = new BookingConfirmedEvent($booking->id()->toString(), $booking->reference()->toString());
+                    break;
+                case 'cancel':
+                    $booking->cancel();
+                    $eventToDispatch = new BookingCancelledEvent($booking->id()->toString(), $booking->reference()->toString());
+                    break;
+                case 'complete':
+                    $booking->complete();
+                    $eventToDispatch = new BookingCompletedEvent($booking->id()->toString(), $booking->reference()->toString());
+                    break;
+                case 'mark_pending':
+                    $booking->markPending();
+                    break;
+                default:
+                    throw new ApplicationException(sprintf('Unknown transition action "%s".', $command->action));
+            }
+
+            $this->bookingRepository->save($booking);
+
+            return ['booking' => $booking, 'event' => $eventToDispatch];
+        });
+
+        if ($txResult['event'] !== null) {
+            $this->eventDispatcher->dispatch($txResult['event']);
         }
 
-        $eventToDispatch = null;
-
-        switch ($command->action) {
-            case 'confirm':
-                $booking->confirm();
-                $eventToDispatch = new BookingConfirmedEvent($booking->id()->toString(), $booking->reference()->toString());
-                break;
-            case 'cancel':
-                $booking->cancel();
-                $eventToDispatch = new BookingCancelledEvent($booking->id()->toString(), $booking->reference()->toString());
-                break;
-            case 'complete':
-                $booking->complete();
-                $eventToDispatch = new BookingCompletedEvent($booking->id()->toString(), $booking->reference()->toString());
-                break;
-            case 'mark_pending':
-                $booking->markPending();
-                break;
-            default:
-                throw new ApplicationException(sprintf('Unknown transition action "%s".', $command->action));
-        }
-
-        // Persist under transaction
-        $this->bookingRepository->save($booking);
-
-        // Post-commit dispatch
-        if ($eventToDispatch !== null) {
-            $this->eventDispatcher->dispatch($eventToDispatch);
-        }
-
+        $booking = $txResult['booking'];
         $cSnap = $booking->customerSnapshot();
         $cDto = new CustomerDTO(
             $cSnap->customerId->toString(),

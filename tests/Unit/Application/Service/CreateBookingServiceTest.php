@@ -10,6 +10,7 @@ use Silao\Application\Event\BookingCreatedEvent;
 use Silao\Application\Event\NullEventDispatcher;
 use Silao\Application\Exception\BookingUnavailableException;
 use Silao\Application\Service\CreateBookingService;
+use Silao\Application\Transaction\TransactionManagerInterface;
 use Silao\Domain\Booking\Repository\BookingRepositoryInterface;
 use Silao\Domain\Common\ValueObject\Currency;
 use Silao\Domain\Common\ValueObject\Money;
@@ -30,10 +31,17 @@ use Silao\Domain\Resource\ValueObject\Schedule;
 final class CreateBookingServiceTest extends TestCase
 {
     private Currency $eur;
+    private TransactionManagerInterface $txManager;
 
     protected function setUp(): void
     {
         $this->eur = Currency::EUR();
+        $this->txManager = new class implements TransactionManagerInterface {
+            public function transactional(callable $operation): mixed
+            {
+                return $operation();
+            }
+        };
     }
 
     public function testNominalBookingCreationAndPostCommitEvent(): void
@@ -64,10 +72,10 @@ final class CreateBookingServiceTest extends TestCase
         $resourceRepo->method('findById')->willReturn($resource);
 
         $customerRepo = $this->createMock(CustomerRepositoryInterface::class);
-        $customerRepo->method('findByEmail')->willReturn(null); // Create new customer
+        $customerRepo->method('findByEmail')->willReturn(null);
 
         $bookingRepo = $this->createMock(BookingRepositoryInterface::class);
-        $bookingRepo->method('findActiveByResourceAndDateRange')->willReturn([]); // No conflict
+        $bookingRepo->method('findActiveByResourceAndDateRange')->willReturn([]);
         $bookingRepo->expects($this->once())->method('save');
 
         $dispatcher = new NullEventDispatcher();
@@ -77,13 +85,14 @@ final class CreateBookingServiceTest extends TestCase
             $resourceRepo,
             $customerRepo,
             $bookingRepo,
+            $this->txManager,
             $dispatcher
         );
 
         $command = new CreateBookingCommand(
             'm1',
             'van_1',
-            '2026-06-15 10:00:00', // Monday 10:00 in Paris (within 08:00-18:00)
+            '2026-06-15 10:00:00',
             '2026-06-15 11:30:00',
             'Europe/Paris',
             'John',
@@ -95,7 +104,7 @@ final class CreateBookingServiceTest extends TestCase
             ['passengers' => 4],
             null,
             null,
-            true // Auto confirm
+            true
         );
 
         $bookingDTO = $service->execute($command);
@@ -103,8 +112,6 @@ final class CreateBookingServiceTest extends TestCase
         $this->assertSame('confirmed', $bookingDTO->status);
         $this->assertSame('John Doe', $bookingDTO->customer->fullName);
         $this->assertSame(10000, $bookingDTO->quote?->totalMinorUnits);
-
-        // Verify post-commit event dispatch
         $this->assertCount(1, $dispatcher->dispatchedEvents);
         $this->assertInstanceOf(BookingCreatedEvent::class, $dispatcher->dispatchedEvents[0]);
     }
@@ -122,7 +129,6 @@ final class CreateBookingServiceTest extends TestCase
             [ResourceId::fromString('van_1')]
         );
 
-        // Resource is Inactive
         $resource = new Resource(
             ResourceId::fromString('van_1'),
             'Mercedes V-Class',
@@ -147,6 +153,7 @@ final class CreateBookingServiceTest extends TestCase
             $resourceRepo,
             $customerRepo,
             $bookingRepo,
+            $this->txManager,
             $dispatcher
         );
 
@@ -164,7 +171,6 @@ final class CreateBookingServiceTest extends TestCase
         $this->expectException(BookingUnavailableException::class);
         $service->execute($command);
 
-        // Zero events dispatched on failure
         $this->assertCount(0, $dispatcher->dispatchedEvents);
     }
 }

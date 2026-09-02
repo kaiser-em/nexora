@@ -4,19 +4,22 @@ declare(strict_types=1);
 
 namespace Silao\Core;
 
-defined('ABSPATH') || exit;
+use Silao\Infrastructure\Container\Container;
+use Silao\Infrastructure\Container\ContainerInterface;
+use Silao\Infrastructure\Container\Provider\ApplicationServiceProvider;
+use Silao\Infrastructure\Container\Provider\DatabaseServiceProvider;
+use Silao\Infrastructure\Container\Provider\EventServiceProvider;
+use Silao\Infrastructure\Container\Provider\RepositoryServiceProvider;
+use Silao\Infrastructure\Container\Provider\RestServiceProvider;
+use Silao\Infrastructure\Container\Provider\TransactionServiceProvider;
+use Silao\REST\RestServer;
 
-/**
- * Core orchestrator and service registry container.
- */
 final class Plugin
 {
     private static ?self $instance = null;
+    private static ?Container $container = null;
     private bool $booted = false;
 
-    /**
-     * Singleton instance.
-     */
     public static function instance(): self
     {
         if (self::$instance === null) {
@@ -26,13 +29,25 @@ final class Plugin
         return self::$instance;
     }
 
+    public static function container(): ContainerInterface
+    {
+        if (self::$container === null) {
+            self::$container = new Container();
+            self::$container->register(new DatabaseServiceProvider());
+            self::$container->register(new RepositoryServiceProvider());
+            self::$container->register(new TransactionServiceProvider());
+            self::$container->register(new EventServiceProvider());
+            self::$container->register(new ApplicationServiceProvider());
+            self::$container->register(new RestServiceProvider());
+        }
+
+        return self::$container;
+    }
+
     private function __construct()
     {
     }
 
-    /**
-     * Boot the plugin hooks and services.
-     */
     public function boot(): void
     {
         if ($this->booted) {
@@ -40,12 +55,11 @@ final class Plugin
         }
 
         $this->booted = true;
+        self::container();
+
         $this->registerHooks();
     }
 
-    /**
-     * Register core WordPress hooks.
-     */
     private function registerHooks(): void
     {
         add_action('init', [$this, 'onInit']);
@@ -56,27 +70,18 @@ final class Plugin
         }
     }
 
-    /**
-     * Handle WordPress 'init' hook.
-     */
     public function onInit(): void
     {
         load_plugin_textdomain('silao', false, dirname(SILAO_PLUGIN_BASENAME) . '/languages');
     }
 
-    /**
-     * Handle WordPress 'rest_api_init' hook.
-     */
     public function onRestApiInit(): void
     {
-        // REST routes will be registered here in upcoming phases
+        $server = self::container()->get(RestServer::class);
+        $server->registerRoutes();
     }
 
-    /**
-     * Handle WordPress 'admin_init' hook.
-     */
     public function onAdminInit(): void
     {
-        // Admin initializations in upcoming phases
     }
 }

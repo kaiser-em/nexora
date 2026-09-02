@@ -13,6 +13,7 @@ use Silao\Application\Event\BookingCreatedEvent;
 use Silao\Application\Event\EventDispatcherInterface;
 use Silao\Application\Exception\BookingUnavailableException;
 use Silao\Application\Exception\BookingValidationException;
+use Silao\Application\Transaction\TransactionManagerInterface;
 use Silao\Domain\Booking\Booking;
 use Silao\Domain\Booking\Repository\BookingRepositoryInterface;
 use Silao\Domain\Booking\ValueObject\BookingId;
@@ -44,6 +45,7 @@ final readonly class CreateBookingService
         private ResourceRepositoryInterface $resourceRepository,
         private CustomerRepositoryInterface $customerRepository,
         private BookingRepositoryInterface $bookingRepository,
+        private TransactionManagerInterface $transactionManager,
         private EventDispatcherInterface $eventDispatcher
     ) {
     }
@@ -54,159 +56,153 @@ final readonly class CreateBookingService
      */
     public function execute(CreateBookingCommand $command): BookingDTO
     {
-        // 1. Load & Validate Booking Model
         $modelId = BookingModelId::fromString($command->modelId);
         $model = $this->modelRepository->findById($modelId);
         if ($model === null) {
             throw new BookingValidationException(sprintf('Booking model "%s" not found.', $command->modelId));
         }
 
-        // 2. Validate Form Fields against Model Definitions
         foreach ($model->fields() as $field) {
             if ($field->isRequired && (!array_key_exists($field->name, $command->formData) || $command->formData[$field->name] === '')) {
                 throw new BookingValidationException(sprintf('Field "%s" (%s) is required.', $field->name, $field->label));
             }
         }
 
-        // 3. Resolve Time Range
         $range = ZonedDateTimeRange::fromIsoStrings(
             $command->startsAtIso,
             $command->endsAtIso,
             $command->timezone
         );
 
-        // 4. Resolve Resource Candidates with Deterministic Lock Order for AutoAssign
-        $resource = null;
-        if ($model->resourceStrategy() === ResourceStrategyType::AutoAssign) {
-            $candidateIds = array_map(static fn($r) => $r->toString(), array_values($model->eligibleResourceIds()));
-            sort($candidateIds); // Deterministic sorting to prevent deadlocks
+        /** @var array{booking: Booking, customer: Customer, quote: Quote} $txResult */
+        $txResult = $this->transactionManager->transactional(function () use ($model, $modelId, $range, $command): array {
+            $resource = null;
+            if ($model->resourceStrategy() === ResourceStrategyType::AutoAssign) {
+                $candidateIds = array_map(static fn($r) => $r->toString(), array_values($model->eligibleResourceIds()));
+                sort($candidateIds);
 
-            foreach ($candidateIds as $cId) {
-                $candResource = $this->resourceRepository->findById(ResourceId::fromString($cId));
-                if ($candResource !== null) {
-                    $activeConf = $this->bookingRepository->findActiveByResourceAndDateRange($candResource->id(), $range);
-                    $check = AvailabilityEngine::check($model, $candResource, $range, 1, $activeConf);
-                    if ($check['is_available']) {
-                        $resource = $candResource;
-                        break;
+                foreach ($candidateIds as $cId) {
+                    $candResource = $this->resourceRepository->findById(ResourceId::fromString($cId));
+                    if ($candResource !== null) {
+                        $activeConf = $this->bookingRepository->findActiveByResourceAndDateRange($candResource->id(), $range);
+                        $check = AvailabilityEngine::check($model, $candResource, $range, 1, $activeConf);
+                        if ($check['is_available']) {
+                            $resource = $candResource;
+                            break;
+                        }
+                    }
+                }
+
+                if ($resource === null) {
+                    throw new BookingUnavailableException('No available resource found for auto-assignment.');
+                }
+            } elseif ($model->resourceStrategy()->requiresResource()) {
+                if ($command->resourceId === null || $command->resourceId === '') {
+                    throw new BookingValidationException('A resource must be selected for this booking model.');
+                }
+                $resourceId = ResourceId::fromString($command->resourceId);
+                $resource = $this->resourceRepository->findById($resourceId);
+                if ($resource === null) {
+                    throw new BookingValidationException(sprintf('Resource "%s" not found.', $command->resourceId));
+                }
+
+                $activeConf = $this->bookingRepository->findActiveByResourceAndDateRange($resourceId, $range);
+                $check = AvailabilityEngine::check($model, $resource, $range, 1, $activeConf);
+                if (!$check['is_available']) {
+                    throw new BookingUnavailableException(sprintf('Selected resource is unavailable: %s', $check['reason_code'] ?? 'UNKNOWN'));
+                }
+            }
+
+            $selectedOptions = [];
+            foreach ($command->selectedOptions as $opt) {
+                $selectedOptions[] = SelectedOptionInput::of((string) $opt['id'], (int) $opt['quantity']);
+            }
+
+            $context = new PricingContext(
+                $modelId,
+                $resource?->id(),
+                $range,
+                $selectedOptions,
+                $command->formData,
+                $command->customerContext,
+                $model->basePrice()->currency
+            );
+
+            $taxRate = $command->taxRateBips !== null
+                ? Percentage::fromBasisPoints($command->taxRateBips)
+                : null;
+
+            $quote = PricingEngine::calculate($model, $context, $taxRate);
+
+            $customerEmail = Email::fromString($command->customerEmail);
+            $customer = $this->customerRepository->findByEmail($customerEmail);
+
+            if ($customer === null) {
+                $customerId = CustomerId::fromString('cust_' . bin2hex(random_bytes(6)));
+                $customerPhone = $command->customerPhone !== null && $command->customerPhone !== ''
+                    ? PhoneNumber::fromString($command->customerPhone)
+                    : null;
+
+                $customer = new Customer(
+                    $customerId,
+                    $customerEmail,
+                    $command->customerFirstName,
+                    $command->customerLastName,
+                    $customerPhone,
+                    $command->customerWpUserId
+                );
+                $this->customerRepository->save($customer);
+            }
+
+            $booking = null;
+            $attempts = 0;
+
+            while ($booking === null && $attempts < self::MAX_REFERENCE_RETRY) {
+                $attempts++;
+                $bookingId = BookingId::fromString('book_' . bin2hex(random_bytes(8)));
+                $reference = BookingReferenceGenerator::generate();
+
+                $candidateBooking = new Booking(
+                    $bookingId,
+                    $reference,
+                    $customer->toSnapshot(),
+                    $modelId,
+                    $resource?->id(),
+                    $range,
+                    new FormDataSnapshot($command->formData)
+                );
+
+                $candidateBooking->createQuote($quote);
+
+                if ($command->autoConfirm) {
+                    $candidateBooking->confirm();
+                }
+
+                try {
+                    $this->bookingRepository->save($candidateBooking);
+                    $booking = $candidateBooking;
+                } catch (\Throwable $e) {
+                    if ($attempts >= self::MAX_REFERENCE_RETRY) {
+                        throw new BookingUnavailableException('Failed to persist booking after reference retry: ' . $e->getMessage(), 0, $e);
                     }
                 }
             }
 
-            if ($resource === null) {
-                throw new BookingUnavailableException('No available resource found for auto-assignment.');
-            }
-        } elseif ($model->resourceStrategy()->requiresResource()) {
-            if ($command->resourceId === null || $command->resourceId === '') {
-                throw new BookingValidationException('A resource must be selected for this booking model.');
-            }
-            $resourceId = ResourceId::fromString($command->resourceId);
-            $resource = $this->resourceRepository->findById($resourceId);
-            if ($resource === null) {
-                throw new BookingValidationException(sprintf('Resource "%s" not found.', $command->resourceId));
+            if ($booking === null) {
+                throw new BookingUnavailableException('Failed to create booking.');
             }
 
-            // Pre-check availability
-            $activeConf = $this->bookingRepository->findActiveByResourceAndDateRange($resourceId, $range);
-            $check = AvailabilityEngine::check($model, $resource, $range, 1, $activeConf);
-            if (!$check['is_available']) {
-                throw new BookingUnavailableException(sprintf('Selected resource is unavailable: %s', $check['reason_code'] ?? 'UNKNOWN'));
-            }
-        }
+            return ['booking' => $booking, 'customer' => $customer, 'quote' => $quote];
+        });
 
-        // 5. Build Server-Authoritative Pricing Context & Recalculate Price
-        $selectedOptions = [];
-        foreach ($command->selectedOptions as $opt) {
-            $selectedOptions[] = SelectedOptionInput::of((string) $opt['id'], (int) $opt['quantity']);
-        }
-
-        $context = new PricingContext(
-            $modelId,
-            $resource?->id(),
-            $range,
-            $selectedOptions,
-            $command->formData,
-            $command->customerContext,
-            $model->basePrice()->currency
-        );
-
-        $taxRate = $command->taxRateBips !== null
-            ? Percentage::fromBasisPoints($command->taxRateBips)
-            : null;
-
-        $quote = PricingEngine::calculate($model, $context, $taxRate);
-
-        // 6. Find or Create Customer
-        $customerEmail = Email::fromString($command->customerEmail);
-        $customer = $this->customerRepository->findByEmail($customerEmail);
-
-        if ($customer === null) {
-            $customerId = CustomerId::fromString('cust_' . bin2hex(random_bytes(6)));
-            $customerPhone = $command->customerPhone !== null && $command->customerPhone !== ''
-                ? PhoneNumber::fromString($command->customerPhone)
-                : null;
-
-            $customer = new Customer(
-                $customerId,
-                $customerEmail,
-                $command->customerFirstName,
-                $command->customerLastName,
-                $customerPhone,
-                $command->customerWpUserId
-            );
-            $this->customerRepository->save($customer);
-        }
-
-        // 7. Instantiate Booking with Snapshots and Retry Loop on Reference Collision
-        $booking = null;
-        $attempts = 0;
-
-        while ($booking === null && $attempts < self::MAX_REFERENCE_RETRY) {
-            $attempts++;
-            $bookingId = BookingId::fromString('book_' . bin2hex(random_bytes(8)));
-            $reference = BookingReferenceGenerator::generate();
-
-            $candidateBooking = new Booking(
-                $bookingId,
-                $reference,
-                $customer->toSnapshot(),
-                $modelId,
-                $resource?->id(),
-                $range,
-                new FormDataSnapshot($command->formData)
-            );
-
-            $candidateBooking->createQuote($quote);
-
-            if ($command->autoConfirm) {
-                $candidateBooking->confirm();
-            }
-
-            try {
-                // 8. Atomic save under transaction with exclusive resource lock in Repository
-                $this->bookingRepository->save($candidateBooking);
-                $booking = $candidateBooking;
-            } catch (\Throwable $e) {
-                if ($attempts >= self::MAX_REFERENCE_RETRY) {
-                    throw new BookingUnavailableException('Failed to persist booking after reference retry: ' . $e->getMessage(), 0, $e);
-                }
-            }
-        }
-
-        if ($booking === null) {
-            throw new BookingUnavailableException('Failed to create booking.');
-        }
-
-        // 9. Post-Commit Event Dispatch
         $this->eventDispatcher->dispatch(new BookingCreatedEvent(
-            $booking->id()->toString(),
-            $booking->reference()->toString(),
-            $booking->modelId()->toString(),
-            $customer->email()->toString()
+            $txResult['booking']->id()->toString(),
+            $txResult['booking']->reference()->toString(),
+            $txResult['booking']->modelId()->toString(),
+            $txResult['customer']->email()->toString()
         ));
 
-        // 10. Assemble DTO Return
-        return self::assembleDTO($booking, $customer, $quote);
+        return self::assembleDTO($txResult['booking'], $txResult['customer'], $txResult['quote']);
     }
 
     private static function assembleDTO(Booking $booking, Customer $customer, Quote $quote): BookingDTO

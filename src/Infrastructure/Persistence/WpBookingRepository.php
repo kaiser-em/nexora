@@ -14,6 +14,7 @@ use Silao\Infrastructure\Database\TableNames;
 use Silao\Infrastructure\Exception\PersistenceException;
 use Silao\Infrastructure\Mapper\BookingMapper;
 use Silao\Infrastructure\Mapper\PriceSnapshotMapper;
+use wpdb;
 
 final class WpBookingRepository implements BookingRepositoryInterface
 {
@@ -23,7 +24,7 @@ final class WpBookingRepository implements BookingRepositoryInterface
     private string $resourcesTable;
 
     /**
-     * @param object $wpdb
+     * @param wpdb|object $wpdb
      */
     public function __construct(
         private readonly object $wpdb,
@@ -40,97 +41,80 @@ final class WpBookingRepository implements BookingRepositoryInterface
      */
     public function save(Booking $booking): void
     {
-        $this->wpdb->query('START TRANSACTION');
-
-        try {
-            // 1. CONCURRENCY CONTROL: Resource Row-Level Exclusive Lock (InnoDB X-Lock)
-            if ($booking->resourceId() !== null && ($booking->status()->isPending() || $booking->status()->isConfirmed())) {
-                $this->assertResourceAvailabilityUnderLock($booking);
-            }
-
-            // 2. Persist or update primary booking row
-            $bData = BookingMapper::toDatabase($booking);
-            $bData['created_at_utc'] = $bData['updated_at_utc'];
-
-            $bookingSql = $this->wpdb->prepare(
-                "INSERT INTO {$this->bookingsTable}
-                 (booking_id, reference, model_id, customer_id, resource_id, status, starts_at_utc, ends_at_utc, timezone, currency, form_data_json, customer_snapshot_json, created_at_utc, updated_at_utc)
-                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                 ON DUPLICATE KEY UPDATE
-                 resource_id = VALUES(resource_id),
-                 status = VALUES(status),
-                 starts_at_utc = VALUES(starts_at_utc),
-                 ends_at_utc = VALUES(ends_at_utc),
-                 timezone = VALUES(timezone),
-                 currency = VALUES(currency),
-                 form_data_json = VALUES(form_data_json),
-                 customer_snapshot_json = VALUES(customer_snapshot_json),
-                 updated_at_utc = VALUES(updated_at_utc)",
-                $bData['booking_id'],
-                $bData['reference'],
-                $bData['model_id'],
-                $bData['customer_id'],
-                $bData['resource_id'],
-                $bData['status'],
-                $bData['starts_at_utc'],
-                $bData['ends_at_utc'],
-                $bData['timezone'],
-                $bData['currency'],
-                $bData['form_data_json'],
-                $bData['customer_snapshot_json'],
-                $bData['created_at_utc'],
-                $bData['updated_at_utc']
-            );
-
-            $res = $this->wpdb->query($bookingSql);
-            if ($res === false) {
-                throw new PersistenceException('SQL error inserting booking: ' . ($this->wpdb->last_error ?? 'Unknown error'));
-            }
-
-            // 3. Persist PriceSnapshot if available
-            if ($booking->priceSnapshot() !== null) {
-                $sData = PriceSnapshotMapper::toDatabase($booking->id()->toString(), $booking->priceSnapshot(), $booking->quote());
-                $snapSql = $this->wpdb->prepare(
-                    "INSERT INTO {$this->snapshotsTable}
-                     (booking_id, currency, subtotal, fees, discounts, total, calculated_at_utc, lines_json, created_at_utc)
-                     VALUES (%s, %s, %d, %d, %d, %d, %s, %s, %s)
-                     ON DUPLICATE KEY UPDATE
-                     currency = VALUES(currency),
-                     subtotal = VALUES(subtotal),
-                     fees = VALUES(fees),
-                     discounts = VALUES(discounts),
-                     total = VALUES(total),
-                     calculated_at_utc = VALUES(calculated_at_utc),
-                     lines_json = VALUES(lines_json)",
-                    $sData['booking_id'],
-                    $sData['currency'],
-                    $sData['subtotal'],
-                    $sData['fees'],
-                    $sData['discounts'],
-                    $sData['total'],
-                    $sData['calculated_at_utc'],
-                    $sData['lines_json'],
-                    $sData['created_at_utc']
-                );
-
-                $snapRes = $this->wpdb->query($snapSql);
-                if ($snapRes === false) {
-                    throw new PersistenceException('SQL error inserting price snapshot: ' . ($this->wpdb->last_error ?? 'Unknown error'));
-                }
-            }
-
-            // 4. EVENT IDEMPOTENCY: Insert only newly raised events
-            $this->insertNewEventsIdempotently($booking);
-
-            $this->wpdb->query('COMMIT');
-        } catch (\Throwable $e) {
-            $this->wpdb->query('ROLLBACK');
-            throw new PersistenceException(
-                sprintf('Transactional save failed for booking "%s": %s', $booking->id()->toString(), $e->getMessage()),
-                0,
-                $e
-            );
+        if ($booking->resourceId() !== null && ($booking->status()->isPending() || $booking->status()->isConfirmed())) {
+            $this->assertResourceAvailabilityUnderLock($booking);
         }
+
+        $bData = BookingMapper::toDatabase($booking);
+        $bData['created_at_utc'] = $bData['updated_at_utc'];
+
+        $bookingSql = $this->wpdb->prepare(
+            "INSERT INTO {$this->bookingsTable}
+             (booking_id, reference, model_id, customer_id, resource_id, status, starts_at_utc, ends_at_utc, timezone, currency, form_data_json, customer_snapshot_json, created_at_utc, updated_at_utc)
+             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+             ON DUPLICATE KEY UPDATE
+             resource_id = VALUES(resource_id),
+             status = VALUES(status),
+             starts_at_utc = VALUES(starts_at_utc),
+             ends_at_utc = VALUES(ends_at_utc),
+             timezone = VALUES(timezone),
+             currency = VALUES(currency),
+             form_data_json = VALUES(form_data_json),
+             customer_snapshot_json = VALUES(customer_snapshot_json),
+             updated_at_utc = VALUES(updated_at_utc)",
+            $bData['booking_id'],
+            $bData['reference'],
+            $bData['model_id'],
+            $bData['customer_id'],
+            $bData['resource_id'],
+            $bData['status'],
+            $bData['starts_at_utc'],
+            $bData['ends_at_utc'],
+            $bData['timezone'],
+            $bData['currency'],
+            $bData['form_data_json'],
+            $bData['customer_snapshot_json'],
+            $bData['created_at_utc'],
+            $bData['updated_at_utc']
+        );
+
+        $res = $this->wpdb->query($bookingSql);
+        if ($res === false) {
+            throw new PersistenceException('SQL error inserting booking: ' . ($this->wpdb->last_error ?? 'Unknown error'));
+        }
+
+        if ($booking->priceSnapshot() !== null) {
+            $sData = PriceSnapshotMapper::toDatabase($booking->id()->toString(), $booking->priceSnapshot(), $booking->quote());
+            $snapSql = $this->wpdb->prepare(
+                "INSERT INTO {$this->snapshotsTable}
+                 (booking_id, currency, subtotal, fees, discounts, total, calculated_at_utc, lines_json, created_at_utc)
+                 VALUES (%s, %s, %d, %d, %d, %d, %s, %s, %s)
+                 ON DUPLICATE KEY UPDATE
+                 currency = VALUES(currency),
+                 subtotal = VALUES(subtotal),
+                 fees = VALUES(fees),
+                 discounts = VALUES(discounts),
+                 total = VALUES(total),
+                 calculated_at_utc = VALUES(calculated_at_utc),
+                 lines_json = VALUES(lines_json)",
+                $sData['booking_id'],
+                $sData['currency'],
+                $sData['subtotal'],
+                $sData['fees'],
+                $sData['discounts'],
+                $sData['total'],
+                $sData['calculated_at_utc'],
+                $sData['lines_json'],
+                $sData['created_at_utc']
+            );
+
+            $snapRes = $this->wpdb->query($snapSql);
+            if ($snapRes === false) {
+                throw new PersistenceException('SQL error inserting price snapshot: ' . ($this->wpdb->last_error ?? 'Unknown error'));
+            }
+        }
+
+        $this->insertNewEventsIdempotently($booking);
     }
 
     public function findById(BookingId $id): ?Booking
@@ -210,11 +194,6 @@ final class WpBookingRepository implements BookingRepositoryInterface
         return $bookings;
     }
 
-    /**
-     * Lock the physical resource row to serialize concurrent booking transactions for this resource.
-     *
-     * @throws PersistenceException
-     */
     private function assertResourceAvailabilityUnderLock(Booking $booking): void
     {
         $resourceIdStr = $booking->resourceId()?->toString();
@@ -222,7 +201,6 @@ final class WpBookingRepository implements BookingRepositoryInterface
             return;
         }
 
-        // 1. Acquire exclusive X-Lock on the resource row
         $lockSql = $this->wpdb->prepare(
             "SELECT id, capacity FROM {$this->resourcesTable} WHERE resource_id = %s FOR UPDATE",
             $resourceIdStr
@@ -234,7 +212,6 @@ final class WpBookingRepository implements BookingRepositoryInterface
 
         $totalCapacity = (int) ($resRow['capacity'] ?? 1);
 
-        // 2. Under this exclusive lock, query active conflicting bookings
         $conflictSql = $this->wpdb->prepare(
             "SELECT booking_id FROM {$this->bookingsTable}
              WHERE resource_id = %s
@@ -262,7 +239,6 @@ final class WpBookingRepository implements BookingRepositoryInterface
     {
         $bookingIdStr = $booking->id()->toString();
 
-        // 1. Query existing events for this booking
         $existingSql = $this->wpdb->prepare(
             "SELECT event_type, occurred_at_utc FROM {$this->eventsTable} WHERE booking_id = %s",
             $bookingIdStr
@@ -279,7 +255,6 @@ final class WpBookingRepository implements BookingRepositoryInterface
             }
         }
 
-        // 2. Insert only events not already in DB
         foreach ($booking->events() as $event) {
             $occurredAtStr = $event->occurredAt()->format('Y-m-d H:i:s');
             $eventKey = $event->type() . '|' . $occurredAtStr;

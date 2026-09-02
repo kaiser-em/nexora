@@ -10,6 +10,7 @@ use Silao\Application\Event\BookingCancelledEvent;
 use Silao\Application\Event\BookingConfirmedEvent;
 use Silao\Application\Event\NullEventDispatcher;
 use Silao\Application\Service\TransitionBookingStatusService;
+use Silao\Application\Transaction\TransactionManagerInterface;
 use Silao\Domain\Booking\Booking;
 use Silao\Domain\Booking\Enum\QuoteLineType;
 use Silao\Domain\Booking\Repository\BookingRepositoryInterface;
@@ -28,6 +29,18 @@ use Silao\Domain\Model\ValueObject\BookingModelId;
 
 final class TransitionBookingStatusServiceTest extends TestCase
 {
+    private TransactionManagerInterface $txManager;
+
+    protected function setUp(): void
+    {
+        $this->txManager = new class implements TransactionManagerInterface {
+            public function transactional(callable $operation): mixed
+            {
+                return $operation();
+            }
+        };
+    }
+
     public function testConfirmAndCancelTransitions(): void
     {
         $eur = Currency::EUR();
@@ -53,15 +66,13 @@ final class TransitionBookingStatusServiceTest extends TestCase
         $repo->expects($this->exactly(2))->method('save');
 
         $dispatcher = new NullEventDispatcher();
-        $service = new TransitionBookingStatusService($repo, $dispatcher);
+        $service = new TransitionBookingStatusService($repo, $this->txManager, $dispatcher);
 
-        // 1. Confirm
         $resDto = $service->execute(new TransitionBookingStatusCommand('b1', 'confirm'));
         $this->assertSame('confirmed', $resDto->status);
         $this->assertCount(1, $dispatcher->dispatchedEvents);
         $this->assertInstanceOf(BookingConfirmedEvent::class, $dispatcher->dispatchedEvents[0]);
 
-        // 2. Cancel
         $resDto2 = $service->execute(new TransitionBookingStatusCommand('b1', 'cancel'));
         $this->assertSame('cancelled', $resDto2->status);
         $this->assertCount(2, $dispatcher->dispatchedEvents);

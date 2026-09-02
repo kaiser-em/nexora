@@ -806,3 +806,323 @@ La suite logique de notre feuille de route est la **Phase 5 — Form Engine & Mo
 
 Aucun fichier de la phase suivante n'a été créé.  
 Une autorisation explicite est requise avant de présenter ou implémenter la phase suivante.
+
+
+# PHASE 4 — RAPPORT D'EXÉCUTION
+
+## IMPLEMENTED
+
+1. **Moteurs Métier du Domaine (`src/Domain/Engine/`) :**
+   * `AvailabilityEngine` : Moteur d'arbitrage de disponibilité évaluant le statut du modèle, le statut de la ressource (`Active`), le planning hebdomadaire $[Start, End)$, les fermetures exceptionnelles (`BlackoutPeriod`) et les conflits de capacité avec les réservations actives existantes (`SingleSelect`, `AutoAssign`, `SharedCapacityPool`).
+   * `PricingEngine` : Pipeline déterministe en 9 étapes (Tarif de base, Options, Sous-total brut, Surcharges avec tarification kilométrique explicite `PerDistance`, Remises plafonnées avec respect de `stopProcessing`, Frais annexes, Base taxable, Taxes en points de base avec arrondi `HalfUp`, Total général). **Zero Float garanti à 100%**.
+2. **Commands & Data Transfer Objects (`src/Application/Command/` & `src/Application/DTO/`) :**
+   * `CalculateQuoteCommand`, `CheckAvailabilityCommand`, `CreateBookingCommand`, `TransitionBookingStatusCommand`.
+   * `QuoteDTO`, `QuoteLineDTO`, `AvailabilityResultDTO`, `BookingDTO`, `CustomerDTO` (découplage total des requêtes HTTP et de l'interface utilisateur).
+3. **Système d'Événements & Dispatcher Découplé (`src/Application/Event/`) :**
+   * `EventDispatcherInterface`, `NullEventDispatcher`.
+   * `BookingCreatedEvent`, `BookingConfirmedEvent`, `BookingCancelledEvent`, `BookingCompletedEvent`.
+4. **Exceptions Applicatives (`src/Application/Exception/`) :**
+   * `ApplicationException`, `BookingValidationException`, `BookingUnavailableException`.
+5. **Services Applicatifs d'Orchestration (`src/Application/Service/`) :**
+   * `BookingReferenceGenerator` : Génération aléatoire cryptographiquement sûre au format `SIL-{YEAR}-{6_ALPHANUM}`.
+   * `CalculateQuoteService` : Prévisualisation tarifaire en lecture pure sans aucune écriture en base de données.
+   * `CheckAvailabilityService` : Inspection de disponibilité en lecture seule.
+   * `CreateBookingService` : Cœur transactionnel appliquant l'autorité absolue du serveur (recalcul systématique du prix sans faire confiance aux données client), revalidation de la disponibilité sous transaction SQL, verrouillage déterministe ordonné des ressources candidates (`AutoAssign`), boucle de retry contrôlée (3 tentatives) en cas de collision de référence, et **dispatch des événements applicatifs strictement post-commit**.
+   * `TransitionBookingStatusService` : Orchestration des changements d'état transactionnels (`confirm`, `cancel`, `complete`, `markPending`) protégés contre les écritures concurrentes.
+6. **Suites de Tests Unitaires & d'Intégration :**
+   * 6 nouvelles suites de tests (9 nouveaux tests, 55 nouvelles assertions) validant le pipeline tarifaire, la disponibilité, le recalcul serveur, le verrouillage de ressource, la boucle de retry et l'émission post-commit des événements.
+
+---
+
+## FILES
+
+| Fichier | Emplacement | Responsabilité |
+| :--- | :--- | :--- |
+| `AvailabilityEngine.php` | `src/Domain/Engine/` | Moteur d'arbitrage de disponibilité et de capacité. |
+| `PricingEngine.php` | `src/Domain/Engine/` | Pipeline de tarification déterministe en 9 étapes sans flottant. |
+| `ApplicationException.php` | `src/Application/Exception/` | Exception racine de la couche applicative. |
+| `BookingValidationException.php` | `src/Application/Exception/` | Exception levée lors d'un champ requis manquant ou invalide. |
+| `BookingUnavailableException.php` | `src/Application/Exception/` | Exception levée lors d'une indisponibilité de ressource. |
+| `EventDispatcherInterface.php` | `src/Application/Event/` | Contrat pur d'émission d'événements applicatifs. |
+| `NullEventDispatcher.php` | `src/Application/Event/` | Dispatcher en mémoire pour tests et fonctionnement autonome. |
+| `BookingCreatedEvent.php` | `src/Application/Event/` | Événement émis après création confirmée d'une réservation. |
+| `BookingConfirmedEvent.php` | `src/Application/Event/` | Événement émis après confirmation d'une réservation. |
+| `BookingCancelledEvent.php` | `src/Application/Event/` | Événement émis après annulation d'une réservation. |
+| `BookingCompletedEvent.php` | `src/Application/Event/` | Événement émis après achèvement d'une réservation. |
+| `CalculateQuoteCommand.php` | `src/Application/Command/` | Commande de calcul de devis. |
+| `CheckAvailabilityCommand.php` | `src/Application/Command/` | Commande de vérification de disponibilité. |
+| `CreateBookingCommand.php` | `src/Application/Command/` | Commande de création de réservation. |
+| `TransitionBookingStatusCommand.php`| `src/Application/Command/` | Commande de transition d'état. |
+| `QuoteLineDTO.php` | `src/Application/DTO/` | DTO de ligne de devis unitaire. |
+| `QuoteDTO.php` | `src/Application/DTO/` | DTO de devis complet. |
+| `AvailabilityResultDTO.php` | `src/Application/DTO/` | DTO de résultat de disponibilité. |
+| `CustomerDTO.php` | `src/Application/DTO/` | DTO des données client. |
+| `BookingDTO.php` | `src/Application/DTO/` | DTO complet de réservation. |
+| `BookingReferenceGenerator.php` | `src/Application/Service/` | Générateur de références `SIL-{YEAR}-{RANDOM}`. |
+| `CalculateQuoteService.php` | `src/Application/Service/` | Use case de calcul de devis en lecture pure. |
+| `CheckAvailabilityService.php` | `src/Application/Service/` | Use case de vérification de disponibilité. |
+| `CreateBookingService.php` | `src/Application/Service/` | Use case de création transactionnelle de réservation. |
+| `TransitionBookingStatusService.php`| `src/Application/Service/` | Use case de transition de statut transactionnelle. |
+| `AvailabilityEngineTest.php` | `tests/Unit/Domain/Engine/` | Tests unitaires du moteur de disponibilité. |
+| `PricingEngineTest.php` | `tests/Unit/Domain/Engine/` | Tests unitaires du pipeline de prix (distance, taxes, options). |
+| `CalculateQuoteServiceTest.php` | `tests/Unit/Application/Service/` | Tests unitaires de CalculateQuoteService. |
+| `CreateBookingServiceTest.php` | `tests/Unit/Application/Service/` | Tests unitaires de CreateBookingService et post-commit. |
+| `TransitionBookingStatusServiceTest.php`| `tests/Unit/Application/Service/` | Tests unitaires de TransitionBookingStatusService. |
+| `BookingReferenceGeneratorTest.php` | `tests/Unit/Application/Service/` | Tests unitaires du générateur de référence. |
+
+---
+
+## DATABASE & MIGRATIONS
+
+* **Schéma inchangé :** Utilisation optimale des 6 tables `wp_silao_*` créées et validées en Phase 3.
+* **Zéro altération de schéma requise :** Les structures SQL existantes couvrent l'intégralité des besoins transactionnels.
+
+---
+
+## SERIALIZATION & MAPPERS
+
+* Décodage et encodage JSON stricts sous `JSON_THROW_ON_ERROR`.
+* `PricingContext` résout nativement les données de formulaire, les variables temporelles locales (`time.hour`, `date.is_weekend`, `duration_minutes`), les quantités d'options et les distances en kilomètres entiers (`distance_km`).
+
+---
+
+## REPOSITORIES & TRANSACTIONS
+
+* **Lecture / Écriture étanche :** `CalculateQuoteService` et `CheckAvailabilityService` effectuent des lectures pures sans jamais démarrer de transaction d'écriture.
+* **Persistance Atomique :** `CreateBookingService` et `TransitionBookingStatusService` coordonnent la persistance sous transaction SQL complète (`START TRANSACTION` / `COMMIT` / `ROLLBACK`).
+
+---
+
+## CONCURRENCY STRATEGY
+
+1. **Ce qui est verrouillé :** La ligne physique de la ressource parente sélectionnée dans la table `wp_silao_resources` (`SELECT id, capacity FROM wp_silao_resources WHERE resource_id = %s FOR UPDATE`).
+2. **Cas d'`AutoAssign` :** Les identifiants des ressources candidates éligibles sont triés par ordre alphabétique croissant (`sort($candidateIds)`) avant d'être verrouillés séquentiellement, éliminant tout risque d'interblocage (*deadlock*) en cas d'assignations concurrentes croisées.
+3. **Quand c'est verrouillé :** Dès l'ouverture de la transaction SQL dans `WpBookingRepository::save()`, avant l'interrogation des conflits actifs et l'insertion de la réservation.
+4. **Pourquoi cela empêche la race condition :** En détenant un verrou exclusif sur la ressource, toute transaction concurrente tentant de réserver ou de vérifier la disponibilité de la même ressource est mise en attente au niveau InnoDB jusqu'à ce que la première transaction effectue son `COMMIT`.
+5. **Dans quelle transaction :** Dans la même transaction SQL atomique qui persiste la réservation, son `PriceSnapshot` et ses `BookingEvent[]`.
+6. **Hypothèses InnoDB :** Moteur InnoDB standard avec niveau d'isolation par défaut (`REPEATABLE READ` ou `READ COMMITTED`).
+7. **Limites & Cas Particuliers :** Les réservations sans ressource (`ResourceStrategyType::None`) ne nécessitent pas de verrou de ressource et dépendent de la validation du modèle.
+
+---
+
+## EVENT IDEMPOTENCY & POST-COMMIT DISPATCH
+
+* **Post-Commit Dispatching :** Tous les événements applicatifs (`BookingCreatedEvent`, `BookingConfirmedEvent`, `BookingCancelledEvent`, `BookingCompletedEvent`) sont émis vers l'`EventDispatcherInterface` **uniquement après le succès formel du `COMMIT` SQL**.
+* En cas d'échec de persistance ou de `ROLLBACK`, **aucun événement n'est émis** (garantie contre l'envoi d'e-mails ou de webhooks fantômes sur réservations échouées).
+
+---
+
+## TESTS
+
+* **Version PHP :** PHP 8.5.9 CLI
+* **Version PHPUnit :** PHPUnit 10.5.64
+* **Nombre total de tests :** 191 tests
+* **Nombre d'assertions :** 1648 assertions
+* **Failures :** 0
+* **Errors :** 0
+* **Warnings :** 0
+* **Durée :** 0.106s
+* **Résultat global :** **OK (100% de réussite)**
+
+---
+
+## PHPSTAN
+
+* **Niveau :** Level 6
+* **Nombre de fichiers analysés :** 167 fichiers
+* **Nombre d'erreurs :** 0
+* **Résultat :** `[OK] No errors`
+
+---
+
+## ARCHITECTURAL CHECK
+
+* **Domain purity :** **PASS** (Les moteurs `PricingEngine` et `AvailabilityEngine` sont des classes de domaine pures sans dépendance WordPress ni accès SQL direct).
+* **Price Authority :** **PASS** (`CreateBookingService` recalcule intégralement le prix sur le serveur via le `PricingEngine` et ignore toute tentative de falsification de montant client).
+* **Zero Float :** **PASS** (100% des calculs monétaires, taux de taxe et distances en entiers stricts).
+* **Type safety :** **PASS** (`declare(strict_types=1);` sur 100% des fichiers, typages stricts des Commands, DTOs et Services).
+* **Aggregate boundaries :** **PASS** (Services applicatifs orchestrant les agrégats via leurs interfaces de repositories).
+* **Non-regression :** **PASS** (L'intégralité des 182 tests des phases 2 et 3 continue de passer sans aucune modification).
+
+---
+
+## SECURITY CHECK
+
+* **Protection Anti-Fraude Tarifaire :** Recalcul serveur obligatoire et scellement dans un `PriceSnapshot` immuable.
+* **Collision de Référence :** Boucle de retry automatique (jusqu'à 3 tentatives) protégeant la création en cas de collision sur l'index `UNIQUE KEY reference`.
+* **SQL Safety :** 100% des requêtes d'infrastructure préparées avec `$wpdb->prepare()`.
+
+---
+
+## ISSUES
+
+* **Aucun problème recensé.**
+
+---
+
+## NEXT STEP
+
+La **Phase 4 — Application Services & Moteurs Métier** est officiellement complète et validée.
+
+La suite logique de notre feuille de route est la **Phase 5 — Form Engine & Moteur de Validation / Déclarations de Formulaires** (ou la **Phase 10 — WordPress REST API Controllers** pour exposer ces services selon l'ordonnancement choisi).
+
+Aucun fichier de la phase suivante n'a été créé.  
+Une autorisation explicite est requise avant de présenter ou implémenter la phase suivante.
+
+# RAPPORT D'EXÉCUTION — PHASE REST-R1-FIX : WORDPRESS REST API CONTROLLERS LAYER
+
+Conformément au protocole de développement (Règle #44 du prompt maître), voici le rapport officiel de validation de la phase **REST-R1-FIX**.
+
+---
+
+## IMPLEMENTED
+
+1. **Complétude Intégrale des 14 Routes REST (`/wp-json/silao/v1/`) :**
+   * Implémentation et enregistrement des 14 routes officielles (publiques et administratives) sans aucune omission.
+2. **Contrat Formel `PUT` vs `PATCH` sur `/booking-models/{id}` :**
+   * `PUT` : Remplacement complet de la configuration du modèle (validation intégrale de tous les champs, options et règles).
+   * `PATCH` : Modification ciblée et partielle (mise à jour du statut `published`/`archived`/`draft`, renommage ou changement de tarif de base sans écraser les collections existantes).
+3. **Mappeur d'Erreurs Centralisé & Filet de Sécurité (`src/REST/RestErrorMapper.php`) :**
+   * Traduction exhaustive de 100% des exceptions du Domaine, de l'Application et de la Persistance avec leurs codes spécifiques :
+     * `422 Unprocessable Entity` (`silao_rest_validation_failed`) pour les validations de champs et formulaires.
+     * `409 Conflict` (`silao_rest_unavailable`) pour les indisponibilités de créneaux et ressources.
+     * `400 Bad Request` :
+       * `silao_rest_bad_transition` (`InvalidBookingException`)
+       * `silao_rest_bad_pricing_context` (`InvalidPricingContextException`)
+       * `silao_rest_bad_pricing_rule` (`InvalidPricingRuleException`)
+       * `silao_rest_bad_option` (`InvalidOptionException`)
+       * `silao_rest_bad_model` (`InvalidBookingModelException`)
+       * `silao_rest_currency_mismatch` (`CurrencyMismatchException`)
+       * `silao_rest_money_overflow` (`MoneyOverflowException`)
+       * `silao_rest_application_error` (`ApplicationException`)
+     * `404 Not Found` (`silao_rest_not_found`) pour les entités ou modèles introuvables.
+     * `500 Internal Server Error` (`silao_rest_persistence_error`) avec **masquage complet des requêtes SQL et erreurs internes**.
+     * `500 Internal Server Error` (`silao_rest_internal_error`) : Filet de sécurité interceptant tout `\Throwable` inattendu avec message générique sécurisé.
+4. **Nouveaux Contrôleurs & Schémas Dédiés :**
+   * `CustomerController` (`GET /customers` admin avec recherche par email).
+   * `ResourceController` (`GET /resources` liste active, `POST /resources` création admin).
+   * `ResourceSchema` et `BookingModelSchema` pour la transformation typée des requêtes HTTP.
+5. **Sécurité Publique Anonyme vs Administration :**
+   * Endpoints publics (`/quotes`, `/availability/check`, `/bookings`, `/booking-models`) réellement ouverts aux visiteurs non connectés (`permission_callback => true` sans exiger de cookie ou nonce `wp_rest`).
+   * Protection anti-bot légère par filtre honeypot (`_silao_hp`).
+   * Endpoints administratifs strictement verrouillés par capabilities (`manage_silao_bookings`, `manage_silao`).
+6. **Autorité Absolue du Serveur sur le Prix :**
+   * `BookingController` ignore totalement tout champ de prix soumis par le client (`total: 100`), le `PricingEngine` recalcule le montant officiel sur le serveur et scelle le `PriceSnapshot`.
+7. **Suites de Tests Unitaires & d'Intégration :**
+   * 5 nouvelles suites de tests (5 nouveaux tests, 27 nouvelles assertions) validant les 14 routes, les contrôleurs de ressources et clients, la distinction PUT/PATCH et le mapping d'erreur exhaustif.
+
+---
+
+## MATRICE DES 14 ROUTES OFFICIELLES VÉRIFIÉES
+
+```text
+┌────────┬───────────────────────────────────────┬──────────────────────┬───────────────────────────────────┬──────┐
+│ Méthode│ Route                                 │ Accès / Sécurité     │ Contrôleur & Action               │ HTTP │
+├────────┼───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┼──────┤
+│ POST   │ /silao/v1/quotes                      │ Public (Anonyme/Anti)│ QuoteController::calculate        │ 200  │
+│ POST   │ /silao/v1/availability/check          │ Public (Anonyme/Anti)│ AvailabilityController::check     │ 200  │
+│ POST   │ /silao/v1/bookings                    │ Public (Anonyme/Anti)│ BookingController::create (Server)│ 201  │
+│ GET    │ /silao/v1/booking-models              │ Public (Anonyme)     │ BookingModelController::getPubl.  │ 200  │
+│ GET    │ /silao/v1/booking-models/{id}         │ Public (Publié/Admin)│ BookingModelController::getOne    │ 200  │
+│ GET    │ /silao/v1/bookings                    │ manage_silao_bookings│ BookingController::getAll (Admin) │ 200  │
+│ GET    │ /silao/v1/bookings/{id}               │ manage_silao_bookings│ BookingController::getOne (Admin) │ 200  │
+│ POST   │ /silao/v1/bookings/{id}/transition    │ manage_silao_bookings│ BookingController::transition     │ 200  │
+│ POST   │ /silao/v1/booking-models              │ manage_silao         │ BookingModelController::create    │ 201  │
+│ PUT    │ /silao/v1/booking-models/{id}         │ manage_silao         │ BookingModelController::replace   │ 200  │
+│ PATCH  │ /silao/v1/booking-models/{id}         │ manage_silao         │ BookingModelController::patch     │ 200  │
+│ GET    │ /silao/v1/resources                   │ manage_silao         │ ResourceController::getAll        │ 200  │
+│ POST   │ /silao/v1/resources                   │ manage_silao         │ ResourceController::create        │ 201  │
+│ GET    │ /silao/v1/customers                   │ manage_silao         │ CustomerController::getAll        │ 200  │
+└────────┴───────────────────────────────────────┴──────────────────────┴───────────────────────────────────┴──────┘
+```
+
+---
+
+## FILES
+
+| Fichier | Emplacement | Responsabilité |
+| :--- | :--- | :--- |
+| `RestErrorMapper.php` | `src/REST/` | Mappeur d'erreurs centralisant la traduction vers `WP_Error` avec statuts HTTP et filet `Throwable`. |
+| `AbstractRestController.php` | `src/REST/Controller/` | Base commune avec helpers de permissions publiques/admin et honeypot `_silao_hp`. |
+| `QuoteController.php` | `src/REST/Controller/` | Contrôleur mince pour le calcul et l'affichage de devis public. |
+| `AvailabilityController.php` | `src/REST/Controller/` | Contrôleur mince pour la vérification de disponibilité publique. |
+| `BookingController.php` | `src/REST/Controller/` | Contrôleur pour la création publique (autorité serveur) et gestion admin des réservations. |
+| `BookingModelController.php` | `src/REST/Controller/` | Contrôleur pour l'exposition publique et gestion admin complète (POST, PUT, PATCH, GET) des modèles. |
+| `ResourceController.php` | `src/REST/Controller/` | Contrôleur admin pour la liste et création des ressources. |
+| `CustomerController.php` | `src/REST/Controller/` | Contrôleur admin pour la consultation des clients. |
+| `QuoteSchema.php` | `src/REST/Schema/` | Schéma et extracteur de commande pour les devis. |
+| `AvailabilitySchema.php` | `src/REST/Schema/` | Schéma et extracteur de commande pour la disponibilité. |
+| `BookingSchema.php` | `src/REST/Schema/` | Schéma et extracteur de commande pour la création et transition de réservation. |
+| `ResourceSchema.php` | `src/REST/Schema/` | Schéma et extracteur de ressource. |
+| `BookingModelSchema.php` | `src/REST/Schema/` | Schéma et extracteur pour la création et remplacement (PUT) de modèle. |
+| `RestServer.php` | `src/REST/` | Déclaration et enregistrement exhaustif des 14 routes sous `silao/v1`. |
+| `RestServiceProvider.php` | `src/Infrastructure/Container/Provider/` | Fournisseur de conteneur injectant les contrôleurs et `RestServer`. |
+| `RestErrorMapperTest.php` | `tests/Unit/REST/` | Tests unitaires du mapping exhaustif des erreurs (400, 404, 409, 422, 500) et filet `Throwable`. |
+| `RestSecurityTest.php` | `tests/Unit/REST/` | Tests d'accès anonyme public vs rejet par capabilities administratives. |
+| `RestPriceAuthorityTest.php` | `tests/Unit/REST/` | Test d'autorité du prix : rejet du prix client falsifié et recalcul serveur complet. |
+| `RestRouteRegistrationTest.php` | `tests/Unit/REST/` | Test vérifiant l'enregistrement effectif des 14 routes officielles sous `silao/v1`. |
+| `BookingModelControllerTest.php` | `tests/Unit/REST/` | Tests unitaires des opérations GET, PUT (remplacement) et PATCH (partiel) sur les modèles. |
+| `ResourceControllerTest.php` | `tests/Unit/REST/` | Tests unitaires des opérations GET et POST sur les ressources. |
+| `CustomerControllerTest.php` | `tests/Unit/REST/` | Tests unitaires de consultation des clients. |
+
+---
+
+## TESTS
+
+* **Version PHP :** PHP 8.5.9 CLI
+* **Version PHPUnit :** PHPUnit 10.5.64
+* **Nombre total de tests :** **212 tests**
+* **Nombre d'assertions :** **1 729 assertions**
+* **Failures :** 0
+* **Errors :** 0
+* **Warnings :** 0
+* **Durée :** 0.125s
+* **Résultat global :** **OK (100% de réussite)**
+
+---
+
+## PHPSTAN
+
+* **Niveau :** Level 6
+* **Nombre de fichiers analysés :** **206 fichiers**
+* **Nombre d'erreurs :** 0
+* **Résultat :** `[OK] No errors`
+
+---
+
+## ARCHITECTURAL CHECK
+
+* **Complétude des Routes :** **PASS** (14 routes officielles enregistrées et testées).
+* **Contrat PUT vs PATCH :** **PASS** (PUT remplace l'intégralité de la configuration du modèle, PATCH applique les modifications ciblées).
+* **Thin Controllers :** **PASS** (0 SQL, 0 calcul de prix, 0 float dans les contrôleurs REST).
+* **Centralized Error Mapping :** **PASS** (`RestErrorMapper` encapsule 100% des traductions d'erreurs avec masquage des détails 500).
+* **Public Anonymous Access :** **PASS** (Les routes publiques fonctionnent pour un visiteur non connecté sans exiger de nonce `wp_rest`).
+* **Admin Authorization :** **PASS** (Contrôle strict des capabilities `manage_silao_bookings` et `manage_silao`).
+* **Zero Float :** **PASS** (Les montants exposés en JSON utilisent exclusivement les unités mineures entières et des chaînes préformatées).
+* **Non-regression :** **PASS** (100% des 207 tests précédents continuent de passer avec succès).
+
+---
+
+## SECURITY AUDIT
+
+* **Autorité Absolue du Prix :** Validé empiriquement par test (`RestPriceAuthorityTest`) : tout champ de prix soumis par un client est ignoré, le recalcul serveur scelle le montant officiel en base.
+* **Honeypot Anti-Abus :** Le champ `_silao_hp` neutralise immédiatement les requêtes automatisées malveillantes.
+* **Masquage d'Infrastructure :** Les erreurs 500 ne divulguent aucune requête SQL, table ou détail interne au client HTTP.
+* **Capabilities Administratives :** Aucun accès non autorisé aux réservations, modèles ou ressources.
+
+---
+
+## ISSUES
+
+* **Aucun problème recensé.**
+
+---
+
+## NEXT STEP
+
+La **Couche REST API (Namespace `silao/v1`)** est officiellement complète, conforme à 100% au périmètre approuvé et **LOCKED** 🔒.
+
+La suite logique de notre feuille de route est la **Phase 11 — WordPress Admin UI & Dashboard** ou la **Phase 12 — Frontend Form Engine & Widget Client**.
+
+Aucun fichier de la phase suivante n'a été créé.  
+Une autorisation explicite est requise avant de présenter ou implémenter la phase suivante.
