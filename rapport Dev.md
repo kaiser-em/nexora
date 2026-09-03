@@ -1126,3 +1126,168 @@ La suite logique de notre feuille de route est la **Phase 11 — WordPress Admin
 
 Aucun fichier de la phase suivante n'a été créé.  
 Une autorisation explicite est requise avant de présenter ou implémenter la phase suivante.
+
+
+# RAPPORT D'EXÉCUTION — PHASE 11-R3 : WORDPRESS ADMIN UI & DASHBOARD (+ EXTENSION REST-R2)
+
+Conformément au protocole de développement (Règle #44 du prompt maître), voici le rapport officiel de validation de la **Phase 11-R3**.
+
+---
+
+## IMPLEMENTED
+
+1. **Extension REST-R2 : Resource Management sous Transaction Applicative :**
+   * `ReplaceResourceCommand`, `UpdateResourceStatusCommand`, `ResourceDTO`.
+   * `ReplaceResourceService` : Exécute le remplacement complet de la ressource sous transaction (`TransactionManagerInterface`) avec verrouillage exclusif de ligne (`SELECT id, capacity FROM wp_silao_resources WHERE resource_id = %s FOR UPDATE`).
+   * `UpdateResourceStatusService` : Exécute la modification ciblée du statut (`active`, `maintenance`, `inactive`) sous transaction avec validation Domain.
+   * `ResourceController` et `ResourceSchema` mis à jour pour supporter formellement `GET /resources/{id}`, `PUT /resources/{id}` et `PATCH /resources/{id}`. **Le contrat REST passe à 17 routes officielles**.
+2. **Couche d'Administration WordPress PHP (`src/Admin/`) :**
+   * `AdminMenu` : Déclaration du menu de premier niveau "Silao" et des 5 sous-menus avec séparation stricte des capabilities :
+     * `manage_silao` pour le Dashboard, les Modèles, les Ressources et les Clients.
+     * `manage_silao_bookings` pour les Réservations.
+     * **Zéro passe-droit générique `manage_options`.**
+   * `AdminAssets` : Chargement conditionnel des scripts et styles ciblé uniquement sur les écrans Silao (`$hook_suffix`), avec injection 100% dynamique des métadonnées système (`get_bloginfo('version')`, `SILAO_VERSION`, `SchemaManager::SCHEMA_VERSION`, `PHP_VERSION`) et du nonce de session `X-WP-Nonce`.
+   * Vues & Conteneurs HTML racines : Vues PHP déclarant le conteneur racine `#silao-admin-app` avec attributs `data-view`.
+   * `AdminServiceProvider` & `Plugin.php` : Câblage du module d'administration dans le `Container` et initialisation lors du hook `admin_menu` et `admin_enqueue_scripts`.
+3. **Application JavaScript Modulaire & DTO-Oriented (`assets/js/admin/`) :**
+   * `core/api.js` : Client HTTP Fetch pur injectant automatiquement les en-têtes `'X-WP-Nonce'` et `'Content-Type': 'application/json'`, et propageant les erreurs REST normalisées.
+   * `core/state.js` : Gestionnaire d'état réactif léger (Pub/Sub minimal).
+   * `components/table.js` : Composant de tableau paginé avec gestion des **4 états visuels stricts** (`Loading`, `Empty`, `Loaded`, `Error`).
+   * Vues d'administration dédiées :
+     * `dashboard-view.js` : Tableau de bord affichant les KPIs réels, les 5 dernières réservations (`per_page=5`) et le moniteur de santé système.
+     * `models-list-view.js` : Liste des modèles avec actions de changement de statut (`PATCH`).
+     * `resources-view.js` : Gestion et édition complète des ressources (`PUT` / `PATCH`).
+     * `bookings-list-view.js` : Liste filtrable des réservations.
+     * `customers-view.js` : Consultation des clients avec recherche par e-mail.
+   * **Zéro logique métier dans le JS :** Le frontend ne calcule aucun prix, aucune taxe et ne décide d'aucune transition ; le serveur reste la source d'autorité absolue.
+4. **Suites de Tests Unitaires & d'Intégration :**
+   * 8 nouvelles suites de tests (13 nouveaux tests, 72 nouvelles assertions) validant la couche d'administration PHP, les capabilities par écran, l'inaccessibilité aux utilisateurs non autorisés, l'extension REST-R2 et les services applicatifs de ressources.
+
+---
+
+## MATRICE DES 17 ROUTES REST OFFICIELLES VÉRIFIÉES
+
+```text
+┌────────┬───────────────────────────────────────┬──────────────────────┬──────────────────────────────────────────┬──────┐
+│ Méthode│ Route                                 │ Accès / Sécurité     │ Contrôleur & Action                      │ HTTP │
+├────────┼───────────────────────────────────────┼──────────────────────┼──────────────────────────────────────────┼──────┤
+│ POST   │ /silao/v1/quotes                      │ Public (Anonyme/Anti)│ QuoteController::calculate               │ 200  │
+│ POST   │ /silao/v1/availability/check          │ Public (Anonyme/Anti)│ AvailabilityController::check            │ 200  │
+│ POST   │ /silao/v1/bookings                    │ Public (Anonyme/Anti)│ BookingController::create (Autorité SV)  │ 201  │
+│ GET    │ /silao/v1/booking-models              │ Public (Anonyme)     │ BookingModelController::getPublished     │ 200  │
+│ GET    │ /silao/v1/booking-models/{id}         │ Public (Publié/Admin)│ BookingModelController::getOne           │ 200  │
+│ GET    │ /silao/v1/bookings                    │ manage_silao_bookings│ BookingController::getAll (Admin List)   │ 200  │
+│ GET    │ /silao/v1/bookings/{id}               │ manage_silao_bookings│ BookingController::getOne (Admin Detail) │ 200  │
+│ POST   │ /silao/v1/bookings/{id}/transition    │ manage_silao_bookings│ BookingController::transition            │ 200  │
+│ POST   │ /silao/v1/booking-models              │ manage_silao         │ BookingModelController::create           │ 201  │
+│ PUT    │ /silao/v1/booking-models/{id}         │ manage_silao         │ BookingModelController::replace (Complet)│ 200  │
+│ PATCH  │ /silao/v1/booking-models/{id}         │ manage_silao         │ BookingModelController::patch (Statut)   │ 200  │
+│ GET    │ /silao/v1/resources                   │ manage_silao         │ ResourceController::getAll               │ 200  │
+│ POST   │ /silao/v1/resources                   │ manage_silao         │ ResourceController::create               │ 201  │
+│ GET    │ /silao/v1/resources/{id}   (REST-R2)  │ manage_silao         │ ResourceController::getOne               │ 200  │
+│ PUT    │ /silao/v1/resources/{id}   (REST-R2)  │ manage_silao         │ ResourceController::replace (Complet)    │ 200  │
+│ PATCH  │ /silao/v1/resources/{id}   (REST-R2)  │ manage_silao         │ ResourceController::patch (Statut seul)  │ 200  │
+│ GET    │ /silao/v1/customers                   │ manage_silao         │ CustomerController::getAll               │ 200  │
+└────────┴───────────────────────────────────────┴──────────────────────┴──────────────────────────────────────────┴──────┘
+```
+
+---
+
+## FILES
+
+| Fichier | Emplacement | Responsabilité |
+| :--- | :--- | :--- |
+| `ReplaceResourceCommand.php` | `src/Application/Command/` | Commande de remplacement complet de ressource. |
+| `UpdateResourceStatusCommand.php` | `src/Application/Command/` | Commande de mise à jour du statut d'une ressource. |
+| `ResourceDTO.php` | `src/Application/DTO/` | DTO de ressource avec plannings et fermetures. |
+| `ReplaceResourceService.php` | `src/Application/Service/` | Service transactionnel de remplacement de ressource avec verrouillage. |
+| `UpdateResourceStatusService.php` | `src/Application/Service/` | Service transactionnel de changement de statut de ressource. |
+| `ResourceSchema.php` *(mis à jour)* | `src/REST/Schema/` | Schéma d'extraction pour création, PUT complet et PATCH de ressource. |
+| `ResourceController.php` *(mis à jour)* | `src/REST/Controller/` | Contrôleur REST avec routes GET /{id}, PUT /{id} et PATCH /{id}. |
+| `RestServer.php` *(mis à jour)* | `src/REST/` | Enregistrement formel des 17 routes de l'API REST `silao/v1`. |
+| `AdminMenu.php` | `src/Admin/` | Déclaration des menus et sous-menus d'administration WordPress. |
+| `AdminAssets.php` | `src/Admin/` | Enqueue conditionnel des assets et injection de `silaoAdminConfig`. |
+| `dashboard.php` | `src/Admin/View/` | Vue HTML racine pour le Dashboard. |
+| `booking-models.php` | `src/Admin/View/` | Vue HTML racine pour les modèles de réservation. |
+| `bookings.php` | `src/Admin/View/` | Vue HTML racine pour les réservations. |
+| `resources.php` | `src/Admin/View/` | Vue HTML racine pour les ressources. |
+| `customers.php` | `src/Admin/View/` | Vue HTML racine pour les clients. |
+| `AdminServiceProvider.php` | `src/Infrastructure/Container/Provider/` | Fournisseur de conteneur pour l'administration. |
+| `Plugin.php` *(mis à jour)* | `src/Core/` | Enregistrement de `AdminServiceProvider` et hooks admin. |
+| `admin.css` | `assets/css/` | Feuilles de styles scopées `.silao-admin-*`. |
+| `api.js` | `assets/js/admin/core/` | Client Fetch DTO avec injection automatique de `X-WP-Nonce`. |
+| `state.js` | `assets/js/admin/core/` | Gestionnaire d'état réactif léger. |
+| `table.js` | `assets/js/admin/components/` | Composant tableau paginé avec les 4 états UI. |
+| `silao-admin.js` | `assets/js/admin/` | Point d'entrée et routeur de l'application JavaScript. |
+| `dashboard-view.js` | `assets/js/admin/views/` | Vue Dashboard KPI (per_page=5). |
+| `models-list-view.js` | `assets/js/admin/views/` | Vue Liste Modèles (actions PATCH statut). |
+| `resources-view.js` | `assets/js/admin/views/` | Vue Liste & Édition des Ressources. |
+| `bookings-list-view.js` | `assets/js/admin/views/` | Vue Liste des Réservations. |
+| `customers-view.js` | `assets/js/admin/views/` | Vue Consultation des Clients. |
+| `ReplaceResourceServiceTest.php` | `tests/Unit/Application/Service/` | Tests unitaires de ReplaceResourceService sous transaction. |
+| `UpdateResourceStatusServiceTest.php` | `tests/Unit/Application/Service/` | Tests unitaires de UpdateResourceStatusService sous transaction. |
+| `ResourceControllerExtendedTest.php` | `tests/Unit/REST/` | Tests unitaires des endpoints GET/PUT/PATCH `/resources/{id}`. |
+| `AdminAuthorizationTest.php` | `tests/Unit/Admin/` | Tests de protection des écrans par capabilities administratives. |
+| `AdminMenuTest.php` | `tests/Unit/Admin/` | Tests d'enregistrement et de rendu des pages d'administration. |
+| `AdminAssetsTest.php` | `tests/Unit/Admin/` | Tests d'enqueue conditionnel et d'absence de versions en dur. |
+| `AdminPageRenderingTest.php` | `tests/Unit/Admin/` | Tests de présence des conteneurs HTML racines `#silao-admin-app`. |
+| `AdminServiceProviderTest.php` | `tests/Unit/Admin/` | Tests d'enregistrement et de résolution du conteneur d'admin. |
+
+---
+
+## TESTS
+
+* **Version PHP :** PHP 8.5.9 CLI
+* **Version PHPUnit :** PHPUnit 10.5.64
+* **Nombre total de tests :** **220 tests**
+* **Nombre d'assertions :** **1 774 assertions**
+* **Failures :** 0
+* **Errors :** 0
+* **Warnings :** 0
+* **Durée :** 0.113s
+* **Résultat global :** **OK (100% de réussite)**
+
+---
+
+## PHPSTAN
+
+* **Niveau :** Level 6
+* **Nombre de fichiers analysés :** **227 fichiers**
+* **Nombre d'erreurs :** 0
+* **Résultat :** `[OK] No errors`
+
+---
+
+## ARCHITECTURAL CHECK
+
+* **REST-R2 Transactional Mutation :** **PASS** (Toute modification de ressource transite par un Application Service sous `TransactionManager` avec X-Lock InnoDB).
+* **Thin Controllers :** **PASS** (0 SQL, 0 logique de calcul, 0 float dans les contrôleurs REST).
+* **Dynamic Versioning :** **PASS** (Versions extraites dynamiquement à l'exécution via `get_bloginfo('version')`, `SILAO_VERSION`, `SchemaManager::SCHEMA_VERSION`).
+* **UI 4 States :** **PASS** (`Loading`, `Empty`, `Loaded`, `Error` implémentés et respectés sur les tableaux).
+* **JS Zero Business Logic :** **PASS** (L'application JavaScript est un client de présentation DTO pur).
+* **Non-regression :** **PASS** (100% des 207 tests précédents continuent de passer avec succès).
+
+---
+
+## SECURITY AUDIT
+
+* **Admin Capabilities :** Accès aux écrans et aux endpoints d'administration strictement filtré par `manage_silao` et `manage_silao_bookings` (testé dans `AdminAuthorizationTest` et `RestSecurityTest`).
+* **CSRF & Nonce Protection :** Injection transparente de `X-WP-Nonce` sur 100% des requêtes d'administration Fetch.
+* **Server Authority :** L'interface ne décide d'aucune transition illégale et ne force aucun prix ; le Domaine serveur valide chaque opération.
+
+---
+
+## ISSUES
+
+* **Aucun problème recensé.**
+
+---
+
+## NEXT STEP
+
+La **Phase 11-R3 — WordPress Admin UI & Dashboard (+ Extension REST-R2)** est officiellement complète, éprouvée et **LOCKED** 🔒.
+
+La suite logique de notre feuille de route est la **Phase 12 — Frontend Form Engine & Widget Client** (Moteur de rendu de formulaire dynamique, état réactif client, prévisualisation de devis et soumission publique).
+
+Aucun fichier de la phase suivante n'a été créé.  
+Une autorisation explicite est requise avant de présenter ou implémenter la phase suivante.

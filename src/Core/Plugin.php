@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Silao\Core;
 
+use Silao\Admin\AdminAssets;
+use Silao\Admin\AdminMenu;
 use Silao\Infrastructure\Container\Container;
 use Silao\Infrastructure\Container\ContainerInterface;
+use Silao\Infrastructure\Container\Provider\AdminServiceProvider;
 use Silao\Infrastructure\Container\Provider\ApplicationServiceProvider;
 use Silao\Infrastructure\Container\Provider\DatabaseServiceProvider;
 use Silao\Infrastructure\Container\Provider\EventServiceProvider;
@@ -39,6 +42,7 @@ final class Plugin
             self::$container->register(new EventServiceProvider());
             self::$container->register(new ApplicationServiceProvider());
             self::$container->register(new RestServiceProvider());
+            self::$container->register(new AdminServiceProvider());
         }
 
         return self::$container;
@@ -66,7 +70,8 @@ final class Plugin
         add_action('rest_api_init', [$this, 'onRestApiInit']);
 
         if (is_admin()) {
-            add_action('admin_init', [$this, 'onAdminInit']);
+            add_action('admin_menu', [$this, 'onAdminMenu']);
+            add_action('admin_enqueue_scripts', [$this, 'onAdminEnqueueScripts']);
         }
     }
 
@@ -81,7 +86,15 @@ final class Plugin
         $server->registerRoutes();
     }
 
-    public function onAdminInit(): void
+    public function onAdminMenu(): void
     {
+        $menu = self::container()->get(AdminMenu::class);
+        $menu->registerMenus();
+    }
+
+    public function onAdminEnqueueScripts(string $hookSuffix): void
+    {
+        $assets = self::container()->get(AdminAssets::class);
+        $assets->enqueue($hookSuffix);
     }
 }

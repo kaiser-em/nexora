@@ -8,7 +8,9 @@ use Silao\Application\Event\EventDispatcherInterface;
 use Silao\Application\Service\CalculateQuoteService;
 use Silao\Application\Service\CheckAvailabilityService;
 use Silao\Application\Service\CreateBookingService;
+use Silao\Application\Service\ReplaceResourceService;
 use Silao\Application\Service\TransitionBookingStatusService;
+use Silao\Application\Service\UpdateResourceStatusService;
 use Silao\Application\Transaction\TransactionManagerInterface;
 use Silao\Domain\Booking\Repository\BookingRepositoryInterface;
 use Silao\Domain\Customer\Repository\CustomerRepositoryInterface;
@@ -49,6 +51,20 @@ final class ApplicationServiceProvider implements ServiceProviderInterface
                 $c->get(BookingRepositoryInterface::class),
                 $c->get(TransactionManagerInterface::class),
                 $c->get(EventDispatcherInterface::class)
+            );
+        });
+
+        $container->singleton(ReplaceResourceService::class, static function (Container $c): ReplaceResourceService {
+            return new ReplaceResourceService(
+                $c->get(ResourceRepositoryInterface::class),
+                $c->get(TransactionManagerInterface::class)
+            );
+        });
+
+        $container->singleton(UpdateResourceStatusService::class, static function (Container $c): UpdateResourceStatusService {
+            return new UpdateResourceStatusService(
+                $c->get(ResourceRepositoryInterface::class),
+                $c->get(TransactionManagerInterface::class)
             );
         });
     }

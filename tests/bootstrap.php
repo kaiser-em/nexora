@@ -43,6 +43,12 @@ if (!class_exists('WP_Error')) {
             $c = $code !== '' ? $code : $this->get_error_code();
             return $this->error_data[$c] ?? null;
         }
+
+        public function get_status(): int
+        {
+            $data = $this->get_error_data();
+            return is_array($data) && isset($data['status']) ? (int) $data['status'] : 500;
+        }
     }
 }
 
@@ -101,6 +107,12 @@ if (!class_exists('WP_REST_Request')) {
         public function get_params(): array
         {
             return array_merge($this->params, $this->bodyParams);
+        }
+
+        /** @return array<string, mixed> */
+        public function get_json_params(): array
+        {
+            return $this->bodyParams;
         }
     }
 }

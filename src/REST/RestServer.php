@@ -29,7 +29,7 @@ final readonly class RestServer
         $resCtrl = $this->container->get(ResourceController::class);
         $custCtrl = $this->container->get(CustomerController::class);
 
-        // 1. PUBLIC ROUTES
+        // 1. PUBLIC ROUTES (5 routes)
         register_rest_route('silao/v1', '/quotes', [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => [$quoteCtrl, 'calculate'],
@@ -60,7 +60,7 @@ final readonly class RestServer
             'permission_callback' => [$modelCtrl, 'checkPublicPermission'],
         ]);
 
-        // 2. ADMIN BOOKINGS ROUTES (manage_silao_bookings)
+        // 2. ADMIN BOOKINGS ROUTES (3 routes - manage_silao_bookings)
         register_rest_route('silao/v1', '/bookings', [
             'methods' => WP_REST_Server::READABLE,
             'callback' => [$bookCtrl, 'getAll'],
@@ -79,7 +79,7 @@ final readonly class RestServer
             'permission_callback' => [$bookCtrl, 'checkManageBookingsPermission'],
         ]);
 
-        // 3. ADMIN CONFIGURATION ROUTES (manage_silao)
+        // 3. ADMIN CONFIGURATION ROUTES (9 routes - manage_silao)
         register_rest_route('silao/v1', '/booking-models', [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => [$modelCtrl, 'create'],
@@ -107,6 +107,24 @@ final readonly class RestServer
         register_rest_route('silao/v1', '/resources', [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => [$resCtrl, 'create'],
+            'permission_callback' => [$resCtrl, 'checkManageModelsPermission'],
+        ]);
+
+        register_rest_route('silao/v1', '/resources/(?P<id>[a-zA-Z0-9_\-]+)', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$resCtrl, 'getOne'],
+            'permission_callback' => [$resCtrl, 'checkManageModelsPermission'],
+        ]);
+
+        register_rest_route('silao/v1', '/resources/(?P<id>[a-zA-Z0-9_\-]+)', [
+            'methods' => 'PUT',
+            'callback' => [$resCtrl, 'replace'],
+            'permission_callback' => [$resCtrl, 'checkManageModelsPermission'],
+        ]);
+
+        register_rest_route('silao/v1', '/resources/(?P<id>[a-zA-Z0-9_\-]+)', [
+            'methods' => 'PATCH',
+            'callback' => [$resCtrl, 'patch'],
             'permission_callback' => [$resCtrl, 'checkManageModelsPermission'],
         ]);
 
