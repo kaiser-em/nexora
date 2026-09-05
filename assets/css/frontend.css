@@ -1,0 +1,110 @@
+:root {
+    --silao-primary: #2271b1;
+    --silao-primary-hover: #135e96;
+    --silao-bg: #ffffff;
+    --silao-text: #1d2327;
+    --silao-text-muted: #646970;
+    --silao-border: #dcdcde;
+    --silao-radius: 6px;
+    --silao-success: #008a20;
+    --silao-error: #d63638;
+}
+
+.silao-booking-widget {
+    box-sizing: border-box;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px;
+    background: var(--silao-bg);
+    color: var(--silao-text);
+    border: 1px solid var(--silao-border);
+    border-radius: var(--silao-radius);
+    font-family: inherit;
+}
+
+.silao-booking-widget *, .silao-booking-widget *::before, .silao-booking-widget *::after {
+    box-sizing: inherit;
+}
+
+.silao-form-group { margin-bottom: 18px; }
+.silao-label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+.silao-input, .silao-select, .silao-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--silao-border);
+    border-radius: var(--silao-radius);
+    font-size: 15px;
+    background: #fff;
+    color: inherit;
+}
+.silao-input:focus, .silao-select:focus, .silao-textarea:focus {
+    border-color: var(--silao-primary);
+    outline: 2px solid rgba(34,113,177,0.25);
+}
+
+.silao-input[aria-invalid="true"] { border-color: var(--silao-error); }
+.silao-field-error { color: var(--silao-error); font-size: 12px; margin-top: 4px; display: block; }
+
+.silao-options-list { margin: 20px 0; border-top: 1px solid var(--silao-border); padding-top: 16px; }
+.silao-option-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f1;
+}
+.silao-qty-controls { display: flex; align-items: center; gap: 8px; }
+.silao-btn-qty {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--silao-border);
+    background: #f6f7f7;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+.silao-btn-qty:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.silao-quote-box {
+    background: #f6f7f7;
+    border: 1px solid var(--silao-border);
+    border-radius: var(--silao-radius);
+    padding: 16px;
+    margin: 20px 0;
+    transition: opacity 0.2s ease;
+}
+.silao-quote-box[aria-busy="true"] { opacity: 0.5; }
+.silao-quote-line { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
+.silao-quote-total { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; border-top: 1px solid var(--silao-border); padding-top: 10px; margin-top: 8px; }
+
+.silao-btn-submit {
+    width: 100%;
+    background: var(--silao-primary);
+    color: #fff;
+    border: none;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: var(--silao-radius);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.silao-btn-submit:hover { background: var(--silao-primary-hover); }
+.silao-btn-submit:disabled { opacity: 0.6; cursor: wait; }
+
+.silao-confirmation-card {
+    text-align: center;
+    padding: 30px 20px;
+}
+.silao-ref-badge {
+    display: inline-block;
+    background: #e7f5ea;
+    color: var(--silao-success);
+    font-size: 22px;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 6px;
+    margin: 15px 0;
+    border: 1px dashed var(--silao-success);
+}

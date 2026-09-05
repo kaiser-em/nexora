@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0.0",
+  "id": "transfer",
+  "version": "1.0.0",
+  "name": "Transfert Privé & Aéroport",
+  "description": "Modèle complet pour services de VTC, navettes aéroport et transferts privés.",
+  "category": "transport",
+  "model": {
+    "default_slug": "transfer-service",
+    "currency": "EUR",
+    "base_price_amount": 3000,
+    "resource_strategy": "single_select"
+  },
+  "fields": [
+    {
+      "name": "pickup_location",
+      "type": "location",
+      "label": "Lieu de prise en charge",
+      "is_required": true,
+      "default_value": null,
+      "validation_rules": {}
+    },
+    {
+      "name": "dropoff_location",
+      "type": "location",
+      "label": "Destination",
+      "is_required": true,
+      "default_value": null,
+      "validation_rules": {}
+    },
+    {
+      "name": "passengers",
+      "type": "number",
+      "label": "Nombre de passagers",
+      "is_required": true,
+      "default_value": 1,
+      "validation_rules": { "min": 1, "max": 8 }
+    },
+    {
+      "name": "distance_km",
+      "type": "number",
+      "label": "Distance estimée (km)",
+      "is_required": true,
+      "default_value": 1,
+      "validation_rules": { "min": 1 }
+    },
+    {
+      "name": "flight_number",
+      "type": "text",
+      "label": "Numéro de vol (optionnel)",
+      "is_required": false,
+      "default_value": null,
+      "validation_rules": {}
+    }
+  ],
+  "options": [
+    {
+      "id": "opt_baby_seat",
+      "code": "baby_seat",
+      "name": "Siège bébé homologué",
+      "description": "Siège pour enfant de 0 à 4 ans.",
+      "pricing_type": "per_unit",
+      "unit_price_amount": 1000,
+      "min_quantity": 0,
+      "max_quantity": 3,
+      "is_mandatory": false,
+      "capacity_impact": 1
+    },
+    {
+      "id": "opt_extra_luggage",
+      "code": "extra_luggage",
+      "name": "Bagage supplémentaire",
+      "description": "Bagage en soute au-delà de la franchise.",
+      "pricing_type": "per_unit",
+      "unit_price_amount": 500,
+      "min_quantity": 0,
+      "max_quantity": 4,
+      "is_mandatory": false,
+      "capacity_impact": 0
+    },
+    {
+      "id": "opt_meet_greet",
+      "code": "meet_greet",
+      "name": "Accueil avec pancarte",
+      "description": "Chauffeur avec pancarte personnalisée dans le terminal.",
+      "pricing_type": "flat",
+      "unit_price_amount": 1500,
+      "min_quantity": 0,
+      "max_quantity": 1,
+      "is_mandatory": false,
+      "capacity_impact": 0
+    }
+  ],
+  "pricing_rules": [
+    {
+      "id": "rule_distance_pricing",
+      "priority": 10,
+      "target": "base_price",
+      "calculation_basis": "per_distance",
+      "adjustment_amount": 200,
+      "adjustment_percentage": null,
+      "stop_processing": false,
+      "condition": {
+        "type": "single",
+        "field": "distance_km",
+        "operator": "greater_than",
+        "expected_value": 0
+      }
+    },
+    {
+      "id": "rule_night_surcharge",
+      "priority": 20,
+      "target": "subtotal",
+      "calculation_basis": "percentage_of_gross_subtotal",
+      "adjustment_amount": null,
+      "adjustment_percentage": 2000,
+      "stop_processing": false,
+      "condition": {
+        "type": "composite",
+        "operator": "or",
+        "conditions": [
+          {
+            "type": "single",
+            "field": "time.hour",
+            "operator": "greater_than_or_equal",
+            "expected_value": 21
+          },
+          {
+            "type": "single",
+            "field": "time.hour",
+            "operator": "less_than",
+            "expected_value": 6
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule_group_surcharge",
+      "priority": 30,
+      "target": "subtotal",
+      "calculation_basis": "percentage_of_gross_subtotal",
+      "adjustment_amount": null,
+      "adjustment_percentage": 1500,
+      "stop_processing": false,
+      "condition": {
+        "type": "single",
+        "field": "passengers",
+        "operator": "greater_than",
+        "expected_value": 4
+      }
+    }
+  ],
+  "sample_resources": [
+    {
+      "resource_id": "res_sedan_comfort",
+      "name": "Berline Confort",
+      "capacity": 4,
+      "status": "active",
+      "schedules": [
+        { "day_of_week": 1, "start_time": "00:00:00", "end_time": "23:59:00" },
+        { "day_of_week": 2, "start_time": "00:00:00", "end_time": "23:59:00" },
+        { "day_of_week": 3, "start_time": "00:00:00", "end_time": "23:59:00" },
+        { "day_of_week": 4, "start_time": "00:00:00", "end_time": "23:59:00" },
+        { "day_of_week": 5, "start_time": "00:00:00", "end_time": "23:59:00" },
+        { "day_of_week": 6, "start_time": "00:00:00", "end_time": "23:59:00" },
+        { "day_of_week": 7, "start_time": "00:00:00", "end_time": "23:59:00" }
+      ],
+      "blackouts": [],
+      "metadata": { "vehicle_type": "sedan" }
+    },
+    {
+      "resource_id": "res_van_executive",
+      "name": "Van Exécutif",
+      "capacity": 7,
+      "status": "active",
+      "schedules": [
+        { "day_of_week": 1, "start_time": "00:00:00", "end_time": "23:59:00" },
+        { "day_of_week": 2, "start_time": "00:00:00", "end_time": "23:59:00" },
+        { "day_of_week": 3, "start_time": "00:00:00", "end_time": "23:59:00" },
+        { "day_of_week": 4, "start_time": "00:00:00", "end_time": "23:59:00" },
+        { "day_of_week": 5, "start_time": "00:00:00", "end_time": "23:59:00" },
+        { "day_of_week": 6, "start_time": "00:00:00", "end_time": "23:59:00" },
+        { "day_of_week": 7, "start_time": "00:00:00", "end_time": "23:59:00" }
+      ],
+      "blackouts": [],
+      "metadata": { "vehicle_type": "van" }
+    }
+  ]
+}

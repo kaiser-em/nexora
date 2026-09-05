@@ -6,12 +6,16 @@ namespace Silao\Core;
 
 use Silao\Admin\AdminAssets;
 use Silao\Admin\AdminMenu;
+use Silao\Frontend\FrontendAssets;
+use Silao\Frontend\Shortcode;
 use Silao\Infrastructure\Container\Container;
 use Silao\Infrastructure\Container\ContainerInterface;
 use Silao\Infrastructure\Container\Provider\AdminServiceProvider;
 use Silao\Infrastructure\Container\Provider\ApplicationServiceProvider;
+use Silao\Infrastructure\Container\Provider\BlueprintServiceProvider;
 use Silao\Infrastructure\Container\Provider\DatabaseServiceProvider;
 use Silao\Infrastructure\Container\Provider\EventServiceProvider;
+use Silao\Infrastructure\Container\Provider\FrontendServiceProvider;
 use Silao\Infrastructure\Container\Provider\RepositoryServiceProvider;
 use Silao\Infrastructure\Container\Provider\RestServiceProvider;
 use Silao\Infrastructure\Container\Provider\TransactionServiceProvider;
@@ -41,8 +45,10 @@ final class Plugin
             self::$container->register(new TransactionServiceProvider());
             self::$container->register(new EventServiceProvider());
             self::$container->register(new ApplicationServiceProvider());
+            self::$container->register(new BlueprintServiceProvider()); // NEW
             self::$container->register(new RestServiceProvider());
             self::$container->register(new AdminServiceProvider());
+            self::$container->register(new FrontendServiceProvider());
         }
 
         return self::$container;
@@ -68,6 +74,12 @@ final class Plugin
     {
         add_action('init', [$this, 'onInit']);
         add_action('rest_api_init', [$this, 'onRestApiInit']);
+
+        $shortcode = self::container()->get(Shortcode::class);
+        $shortcode->register();
+
+        $assets = self::container()->get(FrontendAssets::class);
+        $assets->register();
 
         if (is_admin()) {
             add_action('admin_menu', [$this, 'onAdminMenu']);

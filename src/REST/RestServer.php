@@ -6,6 +6,7 @@ namespace Silao\REST;
 
 use Silao\Infrastructure\Container\ContainerInterface;
 use Silao\REST\Controller\AvailabilityController;
+use Silao\REST\Controller\BlueprintController;
 use Silao\REST\Controller\BookingController;
 use Silao\REST\Controller\BookingModelController;
 use Silao\REST\Controller\CustomerController;
@@ -28,8 +29,9 @@ final readonly class RestServer
         $modelCtrl = $this->container->get(BookingModelController::class);
         $resCtrl = $this->container->get(ResourceController::class);
         $custCtrl = $this->container->get(CustomerController::class);
+        $blueCtrl = $this->container->get(BlueprintController::class);
 
-        // 1. PUBLIC ROUTES (5 routes)
+        // 1. PUBLIC ROUTES
         register_rest_route('silao/v1', '/quotes', [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => [$quoteCtrl, 'calculate'],
@@ -60,7 +62,7 @@ final readonly class RestServer
             'permission_callback' => [$modelCtrl, 'checkPublicPermission'],
         ]);
 
-        // 2. ADMIN BOOKINGS ROUTES (3 routes - manage_silao_bookings)
+        // 2. ADMIN BOOKINGS ROUTES
         register_rest_route('silao/v1', '/bookings', [
             'methods' => WP_REST_Server::READABLE,
             'callback' => [$bookCtrl, 'getAll'],
@@ -79,7 +81,7 @@ final readonly class RestServer
             'permission_callback' => [$bookCtrl, 'checkManageBookingsPermission'],
         ]);
 
-        // 3. ADMIN CONFIGURATION ROUTES (9 routes - manage_silao)
+        // 3. ADMIN CONFIG ROUTES
         register_rest_route('silao/v1', '/booking-models', [
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => [$modelCtrl, 'create'],
@@ -132,6 +134,25 @@ final readonly class RestServer
             'methods' => WP_REST_Server::READABLE,
             'callback' => [$custCtrl, 'getAll'],
             'permission_callback' => [$custCtrl, 'checkManageModelsPermission'],
+        ]);
+
+        // 4. ADMIN BLUEPRINTS ROUTES
+        register_rest_route('silao/v1', '/blueprints', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$blueCtrl, 'getAll'],
+            'permission_callback' => [$blueCtrl, 'checkManageModelsPermission'],
+        ]);
+
+        register_rest_route('silao/v1', '/blueprints/(?P<id>[a-zA-Z0-9_\-]+)', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$blueCtrl, 'getOne'],
+            'permission_callback' => [$blueCtrl, 'checkManageModelsPermission'],
+        ]);
+
+        register_rest_route('silao/v1', '/blueprints/(?P<id>[a-zA-Z0-9_\-]+)/install', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [$blueCtrl, 'install'],
+            'permission_callback' => [$blueCtrl, 'checkManageModelsPermission'],
         ]);
     }
 }

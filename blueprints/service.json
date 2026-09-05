@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0.0",
+  "id": "service",
+  "version": "1.0.0",
+  "name": "Consultation & Rendez-vous Expert",
+  "description": "Modèle pour séances de conseil, consultations juridiques, médicales ou techniques.",
+  "category": "service",
+  "model": {
+    "default_slug": "expert-consultation",
+    "currency": "EUR",
+    "base_price_amount": 8000,
+    "resource_strategy": "auto_assign"
+  },
+  "fields": [
+    {
+      "name": "topic",
+      "type": "text",
+      "label": "Objet de la consultation",
+      "is_required": true,
+      "default_value": null,
+      "validation_rules": {}
+    },
+    {
+      "name": "meeting_type",
+      "type": "select",
+      "label": "Format du rendez-vous",
+      "is_required": true,
+      "default_value": "En ligne (Visioconférence)",
+      "validation_rules": { "allowed_values": ["En ligne (Visioconférence)", "En cabinet"] }
+    },
+    {
+      "name": "notes",
+      "type": "textarea",
+      "label": "Notes préparatoires (optionnel)",
+      "is_required": false,
+      "default_value": null,
+      "validation_rules": {}
+    }
+  ],
+  "options": [
+    {
+      "id": "opt_recording",
+      "code": "recording",
+      "name": "Enregistrement vidéo de la séance",
+      "description": "Lien de téléchargement sécurisé fourni sous 24h.",
+      "pricing_type": "flat",
+      "unit_price_amount": 2000,
+      "min_quantity": 0,
+      "max_quantity": 1,
+      "is_mandatory": false,
+      "capacity_impact": 0
+    },
+    {
+      "id": "opt_express_summary",
+      "code": "express_summary",
+      "name": "Compte-rendu écrit express",
+      "description": "Synthèse détaillée des recommandations livrée sous 24h ouvrées.",
+      "pricing_type": "flat",
+      "unit_price_amount": 5000,
+      "min_quantity": 0,
+      "max_quantity": 1,
+      "is_mandatory": false,
+      "capacity_impact": 0
+    }
+  ],
+  "pricing_rules": [
+    {
+      "id": "rule_duration_pricing",
+      "priority": 10,
+      "target": "base_price",
+      "calculation_basis": "per_duration",
+      "adjustment_amount": 6000,
+      "adjustment_percentage": null,
+      "stop_processing": false,
+      "condition": {
+        "type": "single",
+        "field": "duration_minutes",
+        "operator": "greater_than",
+        "expected_value": 0
+      }
+    },
+    {
+      "id": "rule_weekend_surcharge",
+      "priority": 20,
+      "target": "subtotal",
+      "calculation_basis": "percentage_of_gross_subtotal",
+      "adjustment_amount": null,
+      "adjustment_percentage": 2500,
+      "stop_processing": false,
+      "condition": {
+        "type": "single",
+        "field": "date.is_weekend",
+        "operator": "equals",
+        "expected_value": true
+      }
+    }
+  ],
+  "sample_resources": [
+    {
+      "resource_id": "res_consultant_senior",
+      "name": "Consultant Senior",
+      "capacity": 1,
+      "status": "active",
+      "schedules": [
+        { "day_of_week": 1, "start_time": "09:00:00", "end_time": "18:00:00" },
+        { "day_of_week": 2, "start_time": "09:00:00", "end_time": "18:00:00" },
+        { "day_of_week": 3, "start_time": "09:00:00", "end_time": "18:00:00" },
+        { "day_of_week": 4, "start_time": "09:00:00", "end_time": "18:00:00" },
+        { "day_of_week": 5, "start_time": "09:00:00", "end_time": "18:00:00" }
+      ],
+      "blackouts": [],
+      "metadata": { "specialty": "strategy" }
+    }
+  ]
+}

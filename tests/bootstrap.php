@@ -180,3 +180,79 @@ if (!function_exists('current_user_can')) {
         return false;
     }
 }
+
+if (!function_exists('esc_attr')) {
+    function esc_attr(string $text): string
+    {
+        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (!function_exists('esc_html')) {
+    function esc_html(string $text): string
+    {
+        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (!function_exists('esc_html__')) {
+    function esc_html__(string $text, string $domain = 'default'): string
+    {
+        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (!function_exists('esc_url_raw')) {
+    function esc_url_raw(string $url): string
+    {
+        return filter_var($url, FILTER_SANITIZE_URL) ?: $url;
+    }
+}
+
+if (!function_exists('add_shortcode')) {
+    function add_shortcode(string $tag, callable $callback): void
+    {
+        global $silao_shortcodes;
+        $silao_shortcodes[$tag] = $callback;
+    }
+}
+
+if (!function_exists('has_shortcode')) {
+    function has_shortcode(string $content, string $tag): bool
+    {
+        return str_contains($content, '[' . $tag);
+    }
+}
+
+if (!function_exists('plugins_url')) {
+    function plugins_url(string $path = '', string $plugin = ''): string
+    {
+        return 'http://localhost/wp-content/plugins/silao/' . ltrim($path, '/');
+    }
+}
+
+if (!function_exists('wp_enqueue_style')) {
+    function wp_enqueue_style(string $handle, string $src = '', array $deps = [], mixed $ver = false, string $media = 'all'): void
+    {
+    }
+}
+
+if (!function_exists('wp_enqueue_script')) {
+    function wp_enqueue_script(string $handle, string $src = '', array $deps = [], mixed $ver = false, mixed $args = []): void
+    {
+    }
+}
+
+if (!function_exists('wp_add_inline_script')) {
+    function wp_add_inline_script(string $handle, string $data, string $position = 'after'): bool
+    {
+        return true;
+    }
+}
+
+if (!function_exists('wp_set_script_translations')) {
+    function wp_set_script_translations(string $handle, string $domain = 'default', ?string $path = null): bool
+    {
+        return true;
+    }
+}
